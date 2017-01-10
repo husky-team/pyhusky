@@ -17,8 +17,8 @@
 #include <map>
 #include <string>
 
-#include "base/log.hpp"
-#include "base/serialization.hpp"
+#include "husky/base/log.hpp"
+#include "husky/base/serialization.hpp"
 
 
 namespace husky {

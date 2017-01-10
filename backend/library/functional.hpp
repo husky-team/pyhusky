@@ -15,8 +15,7 @@
 #pragma once
 
 #include <string>
-#include "base/serialization.hpp"
-// #include "core/baseobject.hpp"
+#include "husky/base/serialization.hpp"
 
 namespace husky {
 

@@ -18,8 +18,8 @@
 #include <functional>
 #include <unordered_map>
 
-#include "zmq.hpp"
-#include "base/serialization.hpp"
+#include "husky/core/zmq_helpers.hpp"
+#include "husky/base/serialization.hpp"
 
 namespace husky {
 

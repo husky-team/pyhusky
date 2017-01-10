@@ -13,11 +13,12 @@
 // limitations under the License.
 
 #include "threadconnector.hpp"
-#include "core/context.hpp"
-#include "core/zmq_helpers.hpp"
-#include "base/log.hpp"
-#include "base/serialization.hpp"
-#include "backend/register.hpp"
+#include "register.hpp"
+
+#include "husky/core/context.hpp"
+#include "husky/core/zmq_helpers.hpp"
+#include "husky/base/log.hpp"
+#include "husky/base/serialization.hpp"
 
 namespace husky {
 

@@ -18,17 +18,17 @@
 
 #include "boost/thread.hpp"
 
-#include "backend/daemondriver.hpp"
-#include "backend/workerdriver.hpp"
+#include "daemondriver.hpp"
+#include "workerdriver.hpp"
 
-#include "core/config.hpp"
-#include "core/context.hpp"
-#include "core/constants.hpp"
-#include "core/worker_info.hpp"
-#include "core/mailbox.hpp"
+#include "husky/core/config.hpp"
+#include "husky/core/context.hpp"
+#include "husky/core/constants.hpp"
+#include "husky/core/worker_info.hpp"
+#include "husky/core/mailbox.hpp"
 
-#include "base/session_local.hpp"
-#include "base/log.hpp"
+#include "husky/base/session_local.hpp"
+#include "husky/base/log.hpp"
 
 namespace husky {
 

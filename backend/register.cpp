@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/register.hpp"
+#include "register.hpp"
 
-#include "backend/library/functional.hpp"
-#include "backend/library/linear_regression.hpp"
+#include "library/functional.hpp"
+#include "library/linear_regression.hpp"
 // #include "backend/library/svm.hpp"
 #include "backend/library/logistic_regression.hpp"
 

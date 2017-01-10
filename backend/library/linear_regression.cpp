@@ -24,16 +24,16 @@
 #include "backend/workerdriver.hpp"
 #include "manager/itc.hpp"
 #include "manager/operation.hpp"
-#include "core/context.hpp"
-#include "core/utils.hpp"
-#include "core/zmq_helpers.hpp"
-#include "base/log.hpp"
 
-#include "core/engine.hpp"
-#include "lib/ml/data_loader.hpp"
-#include "lib/ml/linear_regression.hpp"
-#include "lib/ml/scaler.hpp"
-#include "lib/ml/sgd.hpp"
+#include "husky/core/context.hpp"
+#include "husky/core/utils.hpp"
+#include "husky/core/zmq_helpers.hpp"
+#include "husky/base/log.hpp"
+#include "husky/core/engine.hpp"
+#include "husky/lib/ml/data_loader.hpp"
+#include "husky/lib/ml/linear_regression.hpp"
+#include "husky/lib/ml/scaler.hpp"
+#include "husky/lib/ml/sgd.hpp"
 
 namespace husky {
 

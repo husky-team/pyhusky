@@ -12,24 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/workerdriver.hpp"
-
 #include "gperftools/profiler.h"
 
-#include "base/serialization.hpp"
-#include "backend/pythonconnector.hpp"
-#include "backend/threadconnector.hpp"
+#include "workerdriver.hpp"
+#include "pythonconnector.hpp"
+#include "threadconnector.hpp"
 #include "manager/opdag.hpp"
 #include "manager/operation.hpp"
-#include "backend/register.hpp"
-#include "core/context.hpp"
-#include "core/zmq_helpers.hpp"
-#include "core/utils.hpp"
-#include "core/executor.hpp"
-#include "base/log.hpp"
-#include "io/input/line_inputformat.hpp"
+#include "register.hpp"
+
+#include "husky/core/context.hpp"
+#include "husky/base/serialization.hpp"
+#include "husky/core/zmq_helpers.hpp"
+#include "husky/core/utils.hpp"
+#include "husky/core/executor.hpp"
+#include "husky/base/log.hpp"
+#include "husky/io/input/line_inputformat.hpp"
 #ifdef WITH_MONGODB
-#include "io/input/mongodb_inputformat.hpp"
+#include "husky/io/input/mongodb_inputformat.hpp"
 #endif
 
 namespace husky {

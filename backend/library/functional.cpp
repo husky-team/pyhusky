@@ -20,11 +20,12 @@
 #include "backend/pythonconnector.hpp"
 #include "backend/threadconnector.hpp"
 #include "manager/itc.hpp"
-#include "core/context.hpp"
-#include "core/zmq_helpers.hpp"
-#include "io/hdfs_manager.hpp"
-#include "core/engine.hpp"
-#include "base/log.hpp"
+
+#include "husky/core/context.hpp"
+#include "husky/core/zmq_helpers.hpp"
+#include "husky/io/hdfs_manager.hpp"
+#include "husky/core/engine.hpp"
+#include "husky/base/log.hpp"
 
 namespace husky {
 void PyHuskyFunctional::init_py_handlers() {

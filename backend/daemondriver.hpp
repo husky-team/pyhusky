@@ -20,11 +20,10 @@
 
 #include "boost/thread.hpp"
 
-#include "backend/threadconnector.hpp"
+#include "threadconnector.hpp"
 
-#include "core/mailbox.hpp"
-
-#include "base/serialization.hpp"
+#include "husky/core/mailbox.hpp"
+#include "husky/base/serialization.hpp"
 
 
 namespace husky {

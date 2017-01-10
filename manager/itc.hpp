@@ -19,8 +19,8 @@
 #include <string>
 #include <vector>
 
-#include "core/context.hpp"
-#include "core/zmq_helpers.hpp"
+#include "husky/core/context.hpp"
+#include "husky/core/zmq_helpers.hpp"
 
 namespace husky {
 

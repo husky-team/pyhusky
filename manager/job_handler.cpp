@@ -1,17 +1,13 @@
 #include "job_handler.hpp"
 
-#include <core/engine.hpp>
-#include <core/zmq_helpers.hpp>
-#include <lib/graphbase.hpp>
-#include <lib/pagerank.hpp>
-#include <lib/inputformat/lineinputformat.hpp>
-#include <lib/topk.hpp>
-#include <task.hpp>
-#include <opdag.hpp>
-#include <post.hpp>
-#include <python_threadhandler.hpp>
-#include <python_pythonhandler.hpp>
-#include <scalautils.hpp>
+#include "husky/core/engine.hpp"
+#include "husky/core/zmq_helpers.hpp"
+#include "task.hpp"
+#include "opdag.hpp"
+#include "post.hpp"
+#include "python_threadhandler.hpp"
+#include "python_pythonhandler.hpp"
+#include "scalautils.hpp"
 
 namespace husky {
 

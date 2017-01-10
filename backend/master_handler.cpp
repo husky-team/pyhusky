@@ -14,13 +14,14 @@
 
 #include "master_handler.hpp"
 
-#include "core/context.hpp"
-#include "base/log.hpp"
-#include "core/constants.hpp"
+#include "husky/core/context.hpp"
+#include "husky/base/log.hpp"
+#include "husky/core/constants.hpp"
+
 #include "manager/frontend_master_handlers.hpp"
 #include "manager/job.hpp"
 #include "manager/optimizer.hpp"
-#include "backend/splitter_register.hpp"
+#include "splitter_register.hpp"
 
 namespace husky {
 

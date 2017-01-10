@@ -16,7 +16,7 @@
 
 #include <list>
 
-#include "master/master.hpp"
+#include "husky/master/master.hpp"
 
 namespace husky {
 

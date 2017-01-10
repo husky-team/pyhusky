@@ -16,7 +16,7 @@
 
 #include <unordered_map>
 
-#include "backend/threadconnector.hpp"
+#include "threadconnector.hpp"
 
 namespace husky {
 

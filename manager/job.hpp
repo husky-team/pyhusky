@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-#include "base/serialization.hpp"
+#include "husky/base/serialization.hpp"
 #include "opdag.hpp"
 
 namespace husky {

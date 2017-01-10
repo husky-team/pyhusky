@@ -13,12 +13,11 @@
 // limitations under the License.
 
 #include "pythonconnector.hpp"
-
-#include "core/zmq_helpers.hpp"
 #include "manager/itc.hpp"
-#include "backend/register.hpp"
+#include "register.hpp"
 
-#include "base/log.hpp"
+#include "husky/core/zmq_helpers.hpp"
+#include "husky/base/log.hpp"
 
 namespace husky {
 // PythonSocket

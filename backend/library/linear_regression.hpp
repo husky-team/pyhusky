@@ -17,23 +17,20 @@
 #include <memory>
 #include <functional>
 
-#include "core/executor.hpp"
-#include "core/objlist.hpp"
-#include "lib/aggregator_factory.hpp"
-#include "core/zmq_helpers.hpp"
-
-#include "base/serialization.hpp"
-
-#include "lib/ml/feature_label.hpp"
-#include "lib/ml/data_loader.hpp"
-#include "lib/ml/linear_regression.hpp"
-#include "lib/ml/scaler.hpp"
-#include "lib/ml/sgd.hpp"
+#include "husky/core/executor.hpp"
+#include "husky/core/objlist.hpp"
+#include "husky/lib/aggregator_factory.hpp"
+#include "husky/core/zmq_helpers.hpp"
+#include "husky/base/serialization.hpp"
+#include "husky/lib/ml/feature_label.hpp"
+#include "husky/lib/ml/data_loader.hpp"
+#include "husky/lib/ml/linear_regression.hpp"
+#include "husky/lib/ml/scaler.hpp"
+#include "husky/lib/ml/sgd.hpp"
+#include "husky/base/log.hpp"
 
 #include "backend/pythonconnector.hpp"
 #include "manager/itc.hpp"
-
-#include "base/log.hpp"
 
 namespace husky {
 

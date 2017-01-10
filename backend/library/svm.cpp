@@ -12,28 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/library/svm.hpp"
-
 #include <map>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "backend/library/svm.hpp"
 #include "backend/pythonconnector.hpp"
 #include "backend/threadconnector.hpp"
 #include "backend/workerdriver.hpp"
-#include "itc.hpp"
-#include "operation.hpp"
-#include "core/context.hpp"
-#include "core/utils.hpp"
-#include "core/zmq_helpers.hpp"
-#include "base/log.hpp"
+#include "manager/itc.hpp"
+#include "manager/operation.hpp"
 
-#include "core/engine.hpp"
-#include "lib/ml/data_loader.hpp"
-#include "lib/ml/feature_label.hpp"
-#include "lib/ml/parameter.hpp"
-#include "lib/ml/vector_linalg.hpp"
+#include "husky/core/context.hpp"
+#include "husky/core/utils.hpp"
+#include "husky/core/zmq_helpers.hpp"
+#include "husky/base/log.hpp"
+#include "husky/core/engine.hpp"
+#include "husky/lib/ml/data_loader.hpp"
+#include "husky/lib/ml/feature_label.hpp"
+#include "husky/lib/ml/parameter.hpp"
+#include "husky/lib/ml/vector_linalg.hpp"
 
 namespace husky {
 

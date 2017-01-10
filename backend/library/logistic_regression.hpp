@@ -17,16 +17,15 @@
 #include <memory>
 #include <functional>
 
-#include "core/engine.hpp"
-#include "lib/ml/data_loader.hpp"
-#include "lib/ml/fgd.hpp"
-#include "lib/ml/logistic_regression.hpp"
+#include "husky/core/engine.hpp"
+#include "husky/lib/ml/data_loader.hpp"
+#include "husky/lib/ml/fgd.hpp"
+#include "husky/lib/ml/logistic_regression.hpp"
+#include "husky/base/serialization.hpp"
+#include "husky/base/log.hpp"
 
 #include "backend/pythonconnector.hpp"
 #include "manager/itc.hpp"
-
-#include "base/serialization.hpp"
-#include "base/log.hpp"
 
 namespace husky {
 
