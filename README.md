@@ -1,2 +1,2 @@
 # PyHusky
-Husky for python -- on going
+git clone --recursive https://github.com/Gyingguo/pyhusky.git
