@@ -14,6 +14,8 @@
 
 #include "backend/workerdriver.hpp"
 
+#include <string>
+
 #include "husky/base/log.hpp"
 #include "husky/base/serialization.hpp"
 #include "husky/core/context.hpp"

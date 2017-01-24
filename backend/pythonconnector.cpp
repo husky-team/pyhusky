@@ -14,6 +14,8 @@
 
 #include "backend/pythonconnector.hpp"
 
+#include <string>
+
 #include "husky/base/log.hpp"
 #include "husky/core/zmq_helpers.hpp"
 
@@ -21,6 +23,7 @@
 #include "manager/itc.hpp"
 
 namespace husky {
+
 // PythonSocket
 void PythonSocket::init(int wid) {
     std::string master_port = std::to_string(Context::get_config().get_master_port());

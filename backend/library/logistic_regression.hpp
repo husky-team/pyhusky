@@ -14,8 +14,11 @@
 
 #pragma once
 
+#include <algorithm>
 #include <functional>
+#include <map>
 #include <memory>
+#include <string>
 
 #include "husky/base/log.hpp"
 #include "husky/base/serialization.hpp"
@@ -66,13 +69,13 @@ class LogisticModelBase {
 
 template <class A>
 class LogisticModel : public LogisticModelBase {
-   private:
-    A* m;
-
    public:
-    LogisticModel(A* model) { m = model; }
+    explicit LogisticModel(A* model) { m = model; }
     ~LogisticModel() {}
     A* get_model() { return m; }
+
+   private:
+    A* m;
 };
 
 extern thread_local std::map<std::string, std::shared_ptr<LogisticModelBase>> local_SGD_LogisticR_model;

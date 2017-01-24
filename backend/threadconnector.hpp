@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "husky/base/serialization.hpp"
 
 #include "manager/itc.hpp"

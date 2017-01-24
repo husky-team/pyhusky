@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <string>
+#include <vector>
+
 #include "backend/daemondriver.hpp"
 #include "backend/pythonconnector.hpp"
 #include "backend/threadconnector.hpp"

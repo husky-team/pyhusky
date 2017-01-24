@@ -18,4 +18,4 @@ namespace husky {
 
 void splitter_register();
 
-}  // namespace Husky
+}  // namespace husky

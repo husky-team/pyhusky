@@ -14,6 +14,9 @@
 
 #include "master_handler.hpp"
 
+#include <string>
+#include <utility>
+
 #include "husky/base/log.hpp"
 #include "husky/core/constants.hpp"
 #include "husky/core/context.hpp"
@@ -49,7 +52,7 @@ void PyHuskyMasterHandlers::init_master() {
 }
 
 void PyHuskyMasterHandlers::session_begin_handler() {
-    if (not py_started) {
+    if (!py_started) {
         py_started = true;
         BinStream reply;
         reply << std::string("session_begin_py");
@@ -86,7 +89,7 @@ void PyHuskyMasterHandlers::query_task_handler() {
     unsigned int task_id;
     binstream >> task_id;
     BinStream reply;
-    if (not task_results.empty()) {
+    if (!task_results.empty()) {
         reply << std::string("data") << task_results.front().first << task_results.front().second;
         task_results.pop_front();
     } else {
@@ -131,12 +134,12 @@ void PyHuskyMasterHandlers::request_instruction_handler() {
     zmq_sendmore_string(master_handler.get(), master.get_cur_client());
     zmq_sendmore_dummy(master_handler.get());
     bool no_job = parent->pending_jobs.empty();  // no pending job at all
-    if (not no_job) {
+    if (!no_job) {
         int idx = parent->daemon_generation[proc_id] - parent->cur_generation;
         no_job = idx == parent->pending_jobs.size();  // this daemon did all pending jobs already
-        if (not no_job) {
+        if (!no_job) {
             time_t now = time(0);
-            std::string msg = std::string("send new job at ") + ctime(&now);
+            std::string msg = std::string("send new job at ") + ctime_r(&now, NULL);
             msg.back() = '.';  // \n => .
             zmq_send_binstream(master_handler.get(), parent->pending_jobs[idx]->to_bin_stream());
             return;
