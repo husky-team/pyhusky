@@ -15,9 +15,9 @@
 #pragma once
 
 #include "backend/master_handler.hpp"
-#include "opsplitter.hpp"
-#include "opdag.hpp"
-#include "job.hpp"
+#include "manager/job.hpp"
+#include "manager/opdag.hpp"
+#include "manager/opsplitter.hpp"
 #include "master/master.hpp"
 
 namespace husky {
@@ -25,34 +25,32 @@ namespace husky {
 struct Progress {
     Progress() : worker_finished(0), num_tot_worker(0) {}
     Progress(unsigned int a, unsigned int b) : worker_finished(a), num_tot_worker(b) {}
-    Progress(const Progress& p)
-      : worker_finished(p.worker_finished),
-        num_tot_worker(p.num_tot_worker) {}
+    Progress(const Progress& p) : worker_finished(p.worker_finished), num_tot_worker(p.num_tot_worker) {}
     unsigned int worker_finished;
     unsigned int num_tot_worker;
 };
 
 class FrontendMasterHandlers {
-  private:
+   private:
     friend PyHuskyMasterHandlers;
     // master generation for tasks
     int cur_generation = 0;
     // generations of each daemon on each machine for tasks
     std::vector<int> daemon_generation;
 
-  public:
+   public:
     FrontendMasterHandlers();
     void init_master();
-    int dag_split(const OpDAG & dag, int task_id);
+    int dag_split(const OpDAG& dag, int task_id);
 
-  protected:
+   protected:
     std::deque<std::shared_ptr<Job>> pending_jobs;
     PyHuskyMasterHandlers pyhusky_master_handlers;
     std::unordered_map<int, Progress> task_progress;
     void inc_job_progress(int task_id) {
         auto iter = task_progress.find(task_id);
         if (iter != task_progress.end()) {
-            auto & prog = iter->second;
+            auto& prog = iter->second;
             if (++prog.worker_finished == prog.num_tot_worker) {
                 // once iter is removed, prog becomes invalid !
                 task_progress.erase(iter);
@@ -62,9 +60,8 @@ class FrontendMasterHandlers {
     int get_progress(int task_id) {
         auto iter = task_progress.find(task_id);
         if (iter != task_progress.end()) {
-            auto & prog = iter->second;
-            return static_cast<int>(100. *
-                prog.worker_finished / prog.num_tot_worker);
+            auto& prog = iter->second;
+            return static_cast<int>(100. * prog.worker_finished / prog.num_tot_worker);
         } else {
             return 100;
         }

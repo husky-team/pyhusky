@@ -12,43 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gperftools/profiler.h"
+#include "backend/workerdriver.hpp"
 
-#include "workerdriver.hpp"
-#include "pythonconnector.hpp"
-#include "threadconnector.hpp"
-#include "manager/opdag.hpp"
-#include "manager/operation.hpp"
-#include "register.hpp"
-
-#include "husky/core/context.hpp"
-#include "husky/base/serialization.hpp"
-#include "husky/core/zmq_helpers.hpp"
-#include "husky/core/utils.hpp"
-#include "husky/core/executor.hpp"
 #include "husky/base/log.hpp"
+#include "husky/base/serialization.hpp"
+#include "husky/core/context.hpp"
+#include "husky/core/executor.hpp"
+#include "husky/core/utils.hpp"
+#include "husky/core/zmq_helpers.hpp"
 #include "husky/io/input/line_inputformat.hpp"
 #ifdef WITH_MONGODB
 #include "husky/io/input/mongodb_inputformat.hpp"
 #endif
 
+#include "backend/pythonconnector.hpp"
+#include "backend/register.hpp"
+#include "backend/threadconnector.hpp"
+#include "manager/opdag.hpp"
+#include "manager/operation.hpp"
+
 namespace husky {
 
 std::unordered_map<std::string, std::function<bool(WorkerDriverInfo&)>> WorkerDriver::worker_instr_handler_map;
 std::unordered_map<std::string,
-    std::function<void(const Operation& op, PythonSocket& python_socket, ITCWorker& daemon_socket)>> WorkerDriver::worker_operator_handler_map;
+                   std::function<void(const Operation& op, PythonSocket& python_socket, ITCWorker& daemon_socket)>>
+    WorkerDriver::worker_operator_handler_map;
 
-void WorkerDriver::worker_run(WorkerDriverInfo & workerdriver_info) {
+void WorkerDriver::worker_run(WorkerDriverInfo& workerdriver_info) {
     while (true) {
         workerdriver_info.instr = workerdriver_info.to_daemon.recv_string();
-        if (WorkerDriver::worker_instr_handler_map.find(workerdriver_info.instr) != WorkerDriver::worker_instr_handler_map.end()) {
+        if (WorkerDriver::worker_instr_handler_map.find(workerdriver_info.instr) !=
+            WorkerDriver::worker_instr_handler_map.end()) {
             bool exit = WorkerDriver::worker_instr_handler_map[workerdriver_info.instr](workerdriver_info);
-            if (exit) break;
+            if (exit)
+                break;
         } else {
             throw std::runtime_error("Weird message received in worker_run");
         }
     }
-    // if (Context::get_worker<BaseWorker>().id == 0) ProfilerStop();
 }
 void WorkerDriver::init_worker_instr_handler_map() {
     worker_instr_handler_map["session_begin_py"] = session_begin_py;
@@ -61,20 +62,23 @@ void WorkerDriver::register_handler() {
     RegisterFunction::register_cpp_handlers();
 }
 
-void WorkerDriver::add_handler(const std::string& name,
-        std::function<void(const Operation & op, PythonSocket & python_socket, ITCWorker & daemon_socket)> handler) {
-    assert(worker_operator_handler_map.find(name) == worker_operator_handler_map.end() && "handler exists in workerdriver");
+void WorkerDriver::add_handler(
+    const std::string& name,
+    std::function<void(const Operation& op, PythonSocket& python_socket, ITCWorker& daemon_socket)> handler) {
+    assert(worker_operator_handler_map.find(name) == worker_operator_handler_map.end() &&
+           "handler exists in workerdriver");
     worker_operator_handler_map[name] = handler;
 }
 
-void WorkerDriver::add_handler(const std::string & key, const std::function<bool(WorkerDriverInfo&)> & handler) {
+void WorkerDriver::add_handler(const std::string& key, const std::function<bool(WorkerDriverInfo&)>& handler) {
     worker_instr_handler_map.insert(std::make_pair(key, handler));
 }
 
 bool WorkerDriver::session_begin_py(WorkerDriverInfo& workerdriver_info) {
-    workerdriver_info.py_connector = new PythonConnector(workerdriver_info.to_daemon, workerdriver_info.local_worker_id);
-    workerdriver_info.py_connector->start_python_proc(workerdriver_info.local_worker_id,
-            workerdriver_info.global_worker_id, workerdriver_info.num_workers);
+    workerdriver_info.py_connector =
+        new PythonConnector(workerdriver_info.to_daemon, workerdriver_info.local_worker_id);
+    workerdriver_info.py_connector->start_python_proc(
+        workerdriver_info.local_worker_id, workerdriver_info.global_worker_id, workerdriver_info.num_workers);
     return 0;
 }
 bool WorkerDriver::session_end_py(WorkerDriverInfo& workerdriver_info) {
@@ -86,9 +90,9 @@ bool WorkerDriver::session_end_py(WorkerDriverInfo& workerdriver_info) {
     LOG_I << "closed";
     return 1;
 }
-bool WorkerDriver::check_instr(OpDAG & opdag) {
+bool WorkerDriver::check_instr(OpDAG& opdag) {
     std::function<bool(std::shared_ptr<OpNode> node)> visit;
-    visit = [&visit](std::shared_ptr<OpNode> node){
+    visit = [&visit](std::shared_ptr<OpNode> node) {
         std::string type = node->get_op().get_param_or("Type", "py");
         if (type == "py")
             return false;
@@ -107,7 +111,7 @@ bool WorkerDriver::new_instr_py(WorkerDriverInfo& workerdriver_info) {
     job_stream >> opdag;
     // check whether the whole instruction can be executed in c++ side
     bool is_cpp = check_instr(opdag);
-    LOG_I << "Type:"+std::to_string(is_cpp);
+    LOG_I << "Type:" + std::to_string(is_cpp);
     if (is_cpp) {
         return new_instr_cpp_py(workerdriver_info, opdag);
     } else {
@@ -116,15 +120,16 @@ bool WorkerDriver::new_instr_py(WorkerDriverInfo& workerdriver_info) {
         return new_instr_python_py(workerdriver_info, opdag);
     }
 }
-bool WorkerDriver::new_instr_cpp_py(WorkerDriverInfo& workerdriver_info, OpDAG & opdag) {
+bool WorkerDriver::new_instr_cpp_py(WorkerDriverInfo& workerdriver_info, OpDAG& opdag) {
     std::function<void(std::shared_ptr<OpNode> node)> visit;
-    visit = [&visit, &workerdriver_info](std::shared_ptr<OpNode> node){
-        const std::string & operator_name = node->get_op().get_name();
-        LOG_I << "visiting: "+operator_name;
+    visit = [&visit, &workerdriver_info](std::shared_ptr<OpNode> node) {
+        const std::string& operator_name = node->get_op().get_name();
+        LOG_I << "visiting: " + operator_name;
         if (worker_operator_handler_map.find(operator_name) != worker_operator_handler_map.end()) {
-            worker_operator_handler_map[operator_name](node->get_op(), workerdriver_info.py_connector->python_socket, workerdriver_info.py_connector->daemon_socket);
+            worker_operator_handler_map[operator_name](node->get_op(), workerdriver_info.py_connector->python_socket,
+                                                       workerdriver_info.py_connector->daemon_socket);
         } else {
-            throw std::runtime_error("Weird message received in WorkerDriver: "+operator_name);
+            throw std::runtime_error("Weird message received in WorkerDriver: " + operator_name);
         }
         for (auto dep : node->get_deps()) {
             visit(dep);
@@ -133,13 +138,13 @@ bool WorkerDriver::new_instr_cpp_py(WorkerDriverInfo& workerdriver_info, OpDAG &
     visit(opdag.get_leaves()[0]);
     workerdriver_info.py_connector->daemon_socket.send("instr_end");
 }
-bool WorkerDriver::new_instr_python_py(WorkerDriverInfo& workerdriver_info, OpDAG & opdag) {
+bool WorkerDriver::new_instr_python_py(WorkerDriverInfo& workerdriver_info, OpDAG& opdag) {
     LOG_I << "worker_run: start instr";
     ASSERT_MSG(opdag.get_leaves().size() == 1, "not single input");
     auto leave = opdag.get_leaves()[0];
     if (leave->get_op().get_name() == "Functional#load_py") {
         std::string protocol = leave->get_op().get_param("Protocol");
-        if (protocol == "hdfs" || protocol =="nfs") {
+        if (protocol == "hdfs" || protocol == "nfs") {
             husky::io::LineInputFormat infmt;
             const std::string path = leave->get_op().get_param("Path");
             infmt.set_input(path);
@@ -173,15 +178,9 @@ bool WorkerDriver::new_instr_python_py(WorkerDriverInfo& workerdriver_info, OpDA
             std::string password = leave->get_op().get_param("Password");
             if (!username.empty())
                 infmt.set_auth(username, password);
-            // Context::get_worker<BaseWorker>().load(infmt, [&](std::string& chunk) {
-            //     workerdriver_info.py_connector->send_string(chunk);
-            // });
-            husky::load(infmt, [&](std::string& chunk) {
-                workerdriver_info.py_connector->send_string(chunk);
-            });
+            husky::load(infmt, [&](std::string& chunk) { workerdriver_info.py_connector->send_string(chunk); });
 #endif
         } else {
-            // 本地读取数据的接口暂时去掉
             // husky::LineInputFormat<husky::LocalFileSplitter> infmt;
             // std::string path = leave->get_op().get_param("Path");
             // infmt.set_input(path);

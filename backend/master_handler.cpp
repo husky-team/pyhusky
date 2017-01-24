@@ -14,14 +14,14 @@
 
 #include "master_handler.hpp"
 
-#include "husky/core/context.hpp"
 #include "husky/base/log.hpp"
 #include "husky/core/constants.hpp"
+#include "husky/core/context.hpp"
 
+#include "backend/splitter_register.hpp"
 #include "manager/frontend_master_handlers.hpp"
 #include "manager/job.hpp"
 #include "manager/optimizer.hpp"
-#include "splitter_register.hpp"
 
 namespace husky {
 
@@ -32,17 +32,17 @@ void PyHuskyMasterHandlers::init_master() {
 
     // Register handlers with master
     Master::get_instance().register_main_handler(TYPE_SESSION_BEGIN_PY,
-            std::bind(&PyHuskyMasterHandlers::session_begin_handler, this));
+                                                 std::bind(&PyHuskyMasterHandlers::session_begin_handler, this));
     Master::get_instance().register_main_handler(TYPE_SESSION_END_PY,
-            std::bind(&PyHuskyMasterHandlers::session_end_handler, this));
+                                                 std::bind(&PyHuskyMasterHandlers::session_end_handler, this));
     Master::get_instance().register_main_handler(TYPE_NEW_TASK,
-            std::bind(&PyHuskyMasterHandlers::new_task_handler, this));
+                                                 std::bind(&PyHuskyMasterHandlers::new_task_handler, this));
     Master::get_instance().register_main_handler(TYPE_QUERY_TASK,
-            std::bind(&PyHuskyMasterHandlers::query_task_handler, this));
+                                                 std::bind(&PyHuskyMasterHandlers::query_task_handler, this));
     Master::get_instance().register_main_handler(TYPE_TASK_END,
-            std::bind(&PyHuskyMasterHandlers::task_end_handler, this));
+                                                 std::bind(&PyHuskyMasterHandlers::task_end_handler, this));
     Master::get_instance().register_main_handler(TYPE_REQ_INSTR,
-            std::bind(&PyHuskyMasterHandlers::request_instruction_handler, this));
+                                                 std::bind(&PyHuskyMasterHandlers::request_instruction_handler, this));
 
     // Register library splitter
     splitter_register();
@@ -109,10 +109,11 @@ void PyHuskyMasterHandlers::task_end_handler() {
         task_results.push_back(std::move(task_result));
     }
     int idx = (parent->daemon_generation[proc_id]++) - parent->cur_generation;
-    parent->task_progress[parent->pending_jobs[idx]->get_task_id()].worker_finished += Context::get_worker_info().get_num_local_workers(proc_id);
+    parent->task_progress[parent->pending_jobs[idx]->get_task_id()].worker_finished +=
+        Context::get_worker_info().get_num_local_workers(proc_id);
     if (parent->pending_jobs[idx]->inc_num_working_daemons() == Context::get_config().get_num_machines() && idx == 0) {
         parent->cur_generation++;
-        auto & job = parent->pending_jobs.front();
+        auto& job = parent->pending_jobs.front();
         job->dec_dependency(parent->pending_jobs);
         parent->pending_jobs.pop_front();
     }

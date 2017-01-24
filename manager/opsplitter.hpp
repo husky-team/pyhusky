@@ -19,16 +19,15 @@
 #include <string>
 #include <unordered_map>
 
-#include "job.hpp"
-#include "opdag.hpp"
-
+#include "manager/job.hpp"
+#include "manager/opdag.hpp"
 
 namespace husky {
 
 class OperationSplitter {
-  private:
-    #define Ptr std::shared_ptr
-    #define new_ptr std::make_shared
+   private:
+#define Ptr std::shared_ptr
+#define new_ptr std::make_shared
 
     typedef unsigned (*OpSplitterType)(const Ptr<OpNode>&, const Ptr<OpNode>&);
 
@@ -38,7 +37,7 @@ class OperationSplitter {
 
     static std::unordered_map<std::string, OpSplitterType> op_splitter_map;
 
-  public:
+   public:
     static void add_splitter(const std::string& name, const OperationSplitter::OpSplitterType& splitter);
 
     static unsigned _default(const Ptr<OpNode>& op, const Ptr<OpNode>& son);
@@ -59,11 +58,11 @@ class OperationSplitter {
 
     static unsigned handle(const Ptr<OpNode>& op, const Ptr<OpNode>& sons = nullptr);
 
-public:
+   public:
     static unsigned op_split(const Ptr<OpNode>& op, std::deque<Ptr<Job>>& job_deque, unsigned task_id);
 
-    #undef Ptr
-    #undef new_ptr
+#undef Ptr
+#undef new_ptr
 };
 
 }  // namespace husky

@@ -17,17 +17,18 @@
 #include <string>
 #include <vector>
 
+#include "husky/base/log.hpp"
+#include "husky/core/context.hpp"
+#include "husky/core/engine.hpp"
+#include "husky/core/zmq_helpers.hpp"
+#include "husky/io/hdfs_manager.hpp"
+
 #include "backend/pythonconnector.hpp"
 #include "backend/threadconnector.hpp"
 #include "manager/itc.hpp"
 
-#include "husky/core/context.hpp"
-#include "husky/core/zmq_helpers.hpp"
-#include "husky/io/hdfs_manager.hpp"
-#include "husky/core/engine.hpp"
-#include "husky/base/log.hpp"
-
 namespace husky {
+
 void PyHuskyFunctional::init_py_handlers() {
     PythonConnector::add_handler("Functional#reduce_end", reduce_end_handler);
     PythonConnector::add_handler("Functional#count_end", count_end_handler);
@@ -52,20 +53,19 @@ void PyHuskyFunctional::init_daemon_handlers() {
     ThreadConnector::add_handler("Functional#collect_end", daemon_functional_end_handler);
 }
 
-void PyHuskyFunctional::reduce_end_handler(PythonSocket & python_socket, ITCWorker & daemon_socket) {
+void PyHuskyFunctional::reduce_end_handler(PythonSocket& python_socket, ITCWorker& daemon_socket) {
     std::string value = zmq_recv_string(python_socket.pipe_from_python);
     // create objlist
     husky::ObjList<GeneralObject> reduce_list;
     // create ch
-    auto& reduce_ch =
-        husky::ChannelStore::create_push_channel<std::string>(reduce_list, reduce_list);
+    auto& reduce_ch = husky::ChannelStore::create_push_channel<std::string>(reduce_list, reduce_list);
 
     reduce_ch.push(value, 0);
     reduce_ch.flush();
 
     list_execute(reduce_list, [&](GeneralObject& r) {
         auto& msgs = reduce_ch.get(r);
-        for (auto& msg: msgs) { 
+        for (auto& msg : msgs) {
             zmq_send_string(python_socket.pipe_to_python, msg);
         }
     });
@@ -80,7 +80,7 @@ void PyHuskyFunctional::reduce_end_handler(PythonSocket & python_socket, ITCWork
         daemon_socket.send(std::move(value));
     }
 }
-void PyHuskyFunctional::count_end_handler(PythonSocket & python_socket, ITCWorker & daemon_socket) {
+void PyHuskyFunctional::count_end_handler(PythonSocket& python_socket, ITCWorker& daemon_socket) {
     int value = std::stoi(zmq_recv_string(python_socket.pipe_from_python));
     // create objlist
     husky::ObjList<GeneralObject> count_list;
@@ -107,21 +107,21 @@ void PyHuskyFunctional::count_end_handler(PythonSocket & python_socket, ITCWorke
     }
 }
 
-void PyHuskyFunctional::collect_end_handler(PythonSocket & python_socket, ITCWorker & daemon_socket) {
+void PyHuskyFunctional::collect_end_handler(PythonSocket& python_socket, ITCWorker& daemon_socket) {
     std::string name = zmq_recv_string(python_socket.pipe_from_python);
     std::string content = zmq_recv_string(python_socket.pipe_from_python);
     daemon_socket.sendmore("Functional#collect_end");
     daemon_socket.send(std::move(content));
 }
 
-void PyHuskyFunctional::distinct_handler(PythonSocket & python_socket, ITCWorker & daemon_socket) {
+void PyHuskyFunctional::distinct_handler(PythonSocket& python_socket, ITCWorker& daemon_socket) {
     // receive name
     std::string name = zmq_recv_string(python_socket.pipe_from_python);
     // create objlist
     auto& distinct_list = ObjListStore::create_objlist<ReduceObject>(name);
     // create channel
-    auto& distinct_ch =
-        husky::ChannelStore::create_push_combined_channel<std::string, husky::SumCombiner<std::string>>(distinct_list, distinct_list, name);
+    auto& distinct_ch = husky::ChannelStore::create_push_combined_channel<std::string, husky::SumCombiner<std::string>>(
+        distinct_list, distinct_list, name);
     // receive the num of key-value pairs
     int num = std::stoi(zmq_recv_string(python_socket.pipe_from_python));
     for (int i = 0; i < num; i++) {
@@ -130,27 +130,26 @@ void PyHuskyFunctional::distinct_handler(PythonSocket & python_socket, ITCWorker
         distinct_ch.push(value, key);
     }
 }
-void PyHuskyFunctional::distinct_end_handler(PythonSocket & python_socket, ITCWorker & daemon_socket) {
+void PyHuskyFunctional::distinct_end_handler(PythonSocket& python_socket, ITCWorker& daemon_socket) {
     // receive name
     std::string name = zmq_recv_string(python_socket.pipe_from_python);
     // get channel
-    auto& distinct_end_ch = ChannelStoreBase::get_push_combined_channel<std::string, SumCombiner<std::string>, ReduceObject>(name);
+    auto& distinct_end_ch =
+        ChannelStoreBase::get_push_combined_channel<std::string, SumCombiner<std::string>, ReduceObject>(name);
     // get objlist
     auto& distinct_end_list = ObjListStore::get_objlist<ReduceObject>(name);
 
     // flush
     distinct_end_ch.flush();
 
-    list_execute(distinct_end_list, [&](ReduceObject & r) {
-        zmq_send_string(python_socket.pipe_to_python, r.key);
-    });
+    list_execute(distinct_end_list, [&](ReduceObject& r) { zmq_send_string(python_socket.pipe_to_python, r.key); });
 
     zmq_send_string(python_socket.pipe_to_python, "");
 
     ChannelStoreBase::drop_channel(name);
     ObjListStore::drop_objlist(name);
 }
-void PyHuskyFunctional::difference_handler(PythonSocket & python_socket, ITCWorker & daemon_socket) {
+void PyHuskyFunctional::difference_handler(PythonSocket& python_socket, ITCWorker& daemon_socket) {
     // receive name
     std::string name = zmq_recv_string(python_socket.pipe_from_python);
     std::string diff_type = zmq_recv_string(python_socket.pipe_from_python);
@@ -162,13 +161,14 @@ void PyHuskyFunctional::difference_handler(PythonSocket & python_socket, ITCWork
     }
 
     // create objlist
-    auto& diff_list = ObjListStore::has_objlist(name)
-        ? ObjListStore::get_objlist<ReduceObject>(name) : ObjListStore::create_objlist<ReduceObject>(name);
+    auto& diff_list = ObjListStore::has_objlist(name) ? ObjListStore::get_objlist<ReduceObject>(name)
+                                                      : ObjListStore::create_objlist<ReduceObject>(name);
 
     // create channel
     auto& diff_ch = husky::ChannelStore::has_channel(name)
-        ? ChannelStoreBase::get_push_combined_channel<int, SumCombiner<int>, ReduceObject>(name)
-        : husky::ChannelStore::create_push_combined_channel<int, husky::SumCombiner<int>>(diff_list, diff_list, name);
+                        ? ChannelStoreBase::get_push_combined_channel<int, SumCombiner<int>, ReduceObject>(name)
+                        : husky::ChannelStore::create_push_combined_channel<int, husky::SumCombiner<int>>(
+                              diff_list, diff_list, name);
 
     // receive the num of key-value pairs
     int num = std::stoi(zmq_recv_string(python_socket.pipe_from_python));
@@ -177,7 +177,7 @@ void PyHuskyFunctional::difference_handler(PythonSocket & python_socket, ITCWork
         diff_ch.push(type, key);
     }
 }
-void PyHuskyFunctional::difference_end_handler(PythonSocket & python_socket, ITCWorker & daemon_socket) {
+void PyHuskyFunctional::difference_end_handler(PythonSocket& python_socket, ITCWorker& daemon_socket) {
     // receive name
     std::string name = zmq_recv_string(python_socket.pipe_from_python);
     // get channel
@@ -188,7 +188,7 @@ void PyHuskyFunctional::difference_end_handler(PythonSocket & python_socket, ITC
     // flush
     diff_end_ch.flush();
 
-    list_execute(diff_end_list, {&diff_end_ch}, {}, [&](ReduceObject & r) {
+    list_execute(diff_end_list, {&diff_end_ch}, {}, [&](ReduceObject& r) {
         auto msg = diff_end_ch.get(r);
         if (msg == 0) {
             zmq_send_string(python_socket.pipe_to_python, r.key);
@@ -202,14 +202,13 @@ void PyHuskyFunctional::difference_end_handler(PythonSocket & python_socket, ITC
     ObjListStore::drop_objlist(name);
 }
 
-void PyHuskyFunctional::reduce_by_key_handler(PythonSocket & python_socket, ITCWorker & daemon_socket) {
+void PyHuskyFunctional::reduce_by_key_handler(PythonSocket& python_socket, ITCWorker& daemon_socket) {
     // receive name
     std::string name = zmq_recv_string(python_socket.pipe_from_python);
     // create objlist
     auto& reduce_list = ObjListStore::create_objlist<ReduceObject>(name);
     // create channel
-    auto& reduce_ch =
-        husky::ChannelStore::create_push_channel<std::string>(reduce_list, reduce_list, name);
+    auto& reduce_ch = husky::ChannelStore::create_push_channel<std::string>(reduce_list, reduce_list, name);
     // receive the num of key-value pairs
     int num = std::stoi(zmq_recv_string(python_socket.pipe_from_python));
     for (int i = 0; i < num; i++) {
@@ -219,22 +218,22 @@ void PyHuskyFunctional::reduce_by_key_handler(PythonSocket & python_socket, ITCW
     }
 }
 
-void PyHuskyFunctional::reduce_by_key_end_handler(PythonSocket & python_socket, ITCWorker & daemon_socket) {
+void PyHuskyFunctional::reduce_by_key_end_handler(PythonSocket& python_socket, ITCWorker& daemon_socket) {
     // receive name
     std::string name = zmq_recv_string(python_socket.pipe_from_python);
     // get channel
-    auto& reduce_end_ch =  husky::ChannelStore::get_push_channel<std::string, ReduceObject>(name);
+    auto& reduce_end_ch = husky::ChannelStore::get_push_channel<std::string, ReduceObject>(name);
     // get objlist
     auto& reduce_end_list = ObjListStore::get_objlist<ReduceObject>(name);
 
     // flush
     reduce_end_ch.flush();
 
-    list_execute(reduce_end_list, [&](ReduceObject & r) {
-        auto & msgs = reduce_end_ch.get(r);
+    list_execute(reduce_end_list, [&](ReduceObject& r) {
+        auto& msgs = reduce_end_ch.get(r);
         zmq_send_string(python_socket.pipe_to_python, r.key);
         zmq_send_string(python_socket.pipe_to_python, std::to_string(msgs.size()));
-        for (auto & msg : msgs) {
+        for (auto& msg : msgs) {
             zmq_send_string(python_socket.pipe_to_python, msg);
         }
     });
@@ -244,8 +243,9 @@ void PyHuskyFunctional::reduce_by_key_end_handler(PythonSocket & python_socket, 
     ChannelStoreBase::drop_channel(name);
     ObjListStore::drop_objlist(name);
 }
+
 #ifdef WITH_HDFS
-void PyHuskyFunctional::write_to_hdfs_handler(PythonSocket & python_socket, ITCWorker & daemon_socket) {
+void PyHuskyFunctional::write_to_hdfs_handler(PythonSocket& python_socket, ITCWorker& daemon_socket) {
     std::string hdfs_host = Context::get_param("hdfs_namenode");
     std::string hdfs_port = Context::get_param("hdfs_namenode_port");
     std::string name = zmq_recv_string(python_socket.pipe_from_python);
@@ -260,7 +260,7 @@ void PyHuskyFunctional::write_to_hdfs_handler(PythonSocket & python_socket, ITCW
 }
 #endif
 
-void PyHuskyFunctional::daemon_functional_end_handler(ITCDaemon & to_worker, BinStream & buffer) {
+void PyHuskyFunctional::daemon_functional_end_handler(ITCDaemon& to_worker, BinStream& buffer) {
     std::string recv = to_worker.recv_string();
     int flag = 0;  // 0 means sent by python
     buffer << flag << recv;

@@ -25,7 +25,7 @@ class FrontendMasterHandlers;
 class PyHuskyMasterHandlers {
     friend FrontendMasterHandlers;
 
-public:
+   public:
     void init_master();
 
     void session_begin_handler();
@@ -40,14 +40,14 @@ public:
 
     void request_instruction_handler();
 
-protected:
+   protected:
     int need_session_begin_py = 0;
     int need_session_end_py = 0;
-    //int cur_generation = 0;
+    // int cur_generation = 0;
     bool py_started = false;
-    //std::vector<int> daemon_generation;
+    // std::vector<int> daemon_generation;
     std::list<std::pair<int, std::string>> task_results;  // {int,sting}:{from python/cpp, content}
-    FrontendMasterHandlers * parent;
+    FrontendMasterHandlers* parent;
 };
 
 }  // namespace husky

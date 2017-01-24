@@ -27,10 +27,11 @@ namespace husky {
 class ITCWorker;
 
 class PendingData {
-  private:
+   private:
     void* _data;
     std::function<void(void*)> _final;
-  public:
+
+   public:
     PendingData(void* data, std::function<void(void*)> finalizer);
     PendingData(PendingData&& d);
     PendingData(const PendingData& a) = delete;
@@ -42,14 +43,15 @@ class PendingData {
  * if sending int or long, it is better to directly send them
  */
 class ITCDaemon {
-  private:
+   private:
     friend class ITCWorker;  // we are friends~
     static const char* daemon_addr;
     static const char* worker_addr;
     std::vector<ITCWorker*> wbox;
     zmq::socket_t _send, _recv;
     static zmq::context_t& get_zmq_context();
-  public:
+
+   public:
     ITCDaemon();
     ITCWorker& new_itc_worker(int worker_id);
     /**
@@ -70,7 +72,8 @@ class ITCWorker {
     int64_t id;
     explicit ITCWorker(int wid);
     ITCWorker(const ITCWorker& box) = delete;
-public:
+
+   public:
     /**
      * Send a quota to daemon saying I have a thing sent to you
      */

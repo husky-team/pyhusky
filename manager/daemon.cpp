@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <backend/workerdriver.hpp>
-#include <backend/daemondriver.hpp>
-#include <backend/pythonconnector.hpp>
-#include <backend/threadconnector.hpp>
+#include "backend/daemondriver.hpp"
+#include "backend/pythonconnector.hpp"
+#include "backend/threadconnector.hpp"
+#include "backend/workerdriver.hpp"
 
-int main(int argc, char ** argv) {
+int main(int argc, char** argv) {
     husky::WorkerDriver::init_worker_instr_handler_map();
     husky::DaemonDriver::init_daemon_handler_map();
     // Register the handlers
@@ -29,8 +29,6 @@ int main(int argc, char ** argv) {
     std::vector<std::string> args;
     args.push_back("hdfs_namenode");
     args.push_back("hdfs_namenode_port");
-    // args.push_back("train");
-    // args.push_back("test");
     args.push_back("n_iter");
     args.push_back("alpha");
     args.push_back("lambda");

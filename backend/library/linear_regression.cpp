@@ -19,21 +19,21 @@
 #include <utility>
 #include <vector>
 
+#include "husky/base/log.hpp"
+#include "husky/core/context.hpp"
+#include "husky/core/engine.hpp"
+#include "husky/core/utils.hpp"
+#include "husky/core/zmq_helpers.hpp"
+#include "husky/lib/ml/data_loader.hpp"
+#include "husky/lib/ml/linear_regression.hpp"
+#include "husky/lib/ml/scaler.hpp"
+#include "husky/lib/ml/sgd.hpp"
+
 #include "backend/pythonconnector.hpp"
 #include "backend/threadconnector.hpp"
 #include "backend/workerdriver.hpp"
 #include "manager/itc.hpp"
 #include "manager/operation.hpp"
-
-#include "husky/core/context.hpp"
-#include "husky/core/utils.hpp"
-#include "husky/core/zmq_helpers.hpp"
-#include "husky/base/log.hpp"
-#include "husky/core/engine.hpp"
-#include "husky/lib/ml/data_loader.hpp"
-#include "husky/lib/ml/linear_regression.hpp"
-#include "husky/lib/ml/scaler.hpp"
-#include "husky/lib/ml/sgd.hpp"
 
 namespace husky {
 
@@ -57,73 +57,78 @@ void PyHuskyLinearR::init_daemon_handlers() {
     ThreadConnector::add_handler("LinearRegressionModel#LinearR_train", daemon_train_handler);
 }
 
-void PyHuskyLinearR::LinearR_load_pyhlist_handler(PythonSocket & python_socket, ITCWorker & daemon_socket) {
+void PyHuskyLinearR::LinearR_load_pyhlist_handler(PythonSocket& python_socket, ITCWorker& daemon_socket) {
     LOG_I << "start LinearR_load_pyhlist";
-    //override
+    // override
     std::string name = zmq_recv_string(python_socket.pipe_from_python);
     std::string sparse = zmq_recv_string(python_socket.pipe_from_python);
 
     // create model
-    if (sparse == "1") {Linear_create_model_from_pyhuskylist<true>(name, python_socket, daemon_socket);}
-    else {Linear_create_model_from_pyhuskylist<false>(name, python_socket, daemon_socket);}
+    if (sparse == "1") {
+        Linear_create_model_from_pyhuskylist<true>(name, python_socket, daemon_socket);
+    } else {
+        Linear_create_model_from_pyhuskylist<false>(name, python_socket, daemon_socket);
+    }
 
     LOG_I << "create SGD Linear Regression Model";
 }
 
-void PyHuskyLinearR::LinearR_init_handler(const Operation & op,
-        PythonSocket & python_socket,
-        ITCWorker & daemon_socket) {
+void PyHuskyLinearR::LinearR_init_handler(const Operation& op, PythonSocket& python_socket, ITCWorker& daemon_socket) {
     LOG_I << "LinearR_init_handler";
 }
 
-void PyHuskyLinearR::LinearR_load_hdfs_handler(const Operation & op,
-        PythonSocket & python_socket,
-        ITCWorker & daemon_socket) {
+void PyHuskyLinearR::LinearR_load_hdfs_handler(const Operation& op, PythonSocket& python_socket,
+                                               ITCWorker& daemon_socket) {
     // overide
     // Get Parameters sent from python
-    const std::string & url = op.get_param("url");
-    const std::string & sparse = op.get_param("is_sparse");
-    const std::string & format = op.get_param("format");
+    const std::string& url = op.get_param("url");
+    const std::string& sparse = op.get_param("is_sparse");
+    const std::string& format = op.get_param("format");
 
     // is_sparse
     bool is_sparse = sparse == "1" ? true : false;
-    husky::lib::ml::DataFormat data_format = format == "tsv" ? husky::lib::ml::kTSVFormat : husky::lib::ml::kLIBSVMFormat;
+    husky::lib::ml::DataFormat data_format =
+        format == "tsv" ? husky::lib::ml::kTSVFormat : husky::lib::ml::kLIBSVMFormat;
     const std::string& name = op.get_param("list_name");
 
     // create model
-    if (is_sparse) {Linear_create_model_from_url<true>(name, url, data_format);}
-    else {Linear_create_model_from_url<false>(name, url, data_format);}
-    
+    if (is_sparse) {
+        Linear_create_model_from_url<true>(name, url, data_format);
+    } else {
+        Linear_create_model_from_url<false>(name, url, data_format);
+    }
+
     LOG_I << "create SGD Linear Regression Model";
 }
 
-void PyHuskyLinearR::LinearR_train_handler(const Operation & op,
-        PythonSocket & python_socket,
-        ITCWorker & daemon_socket) {
+void PyHuskyLinearR::LinearR_train_handler(const Operation& op, PythonSocket& python_socket, ITCWorker& daemon_socket) {
     // override
     LOG_I << "start LinearR_train";
-    
-    const std::string & sparse = op.get_param("is_sparse");
+
+    const std::string& sparse = op.get_param("is_sparse");
     bool is_sparse = sparse == "1" ? true : false;
-    const std::string & name = op.get_param("list_name");
+    const std::string& name = op.get_param("list_name");
     double alpha = std::stod(op.get_param("alpha"));
     int num_iter = std::stoi(op.get_param("n_iter"));
 
     // train model
-    if (is_sparse) {Linear_train_model<true>(name, alpha, num_iter);}
-    else {Linear_train_model<false>(name, alpha, num_iter);}
+    if (is_sparse) {
+        Linear_train_model<true>(name, alpha, num_iter);
+    } else {
+        Linear_train_model<false>(name, alpha, num_iter);
+    }
 
     // Send Back the parameter to pyHusky
     if (husky::Context::get_global_tid() == 0) {
         LOG_I << "send back the parameter to pyHusky";
-        BinStream result = is_sparse ? Linear_get_params<true>(name): Linear_get_params<false>(name);
+        BinStream result = is_sparse ? Linear_get_params<true>(name) : Linear_get_params<false>(name);
         daemon_socket.sendmore("LinearRegressionModel#LinearR_train");
         daemon_socket.send(std::move(result));
     }
     LOG_I << "finish LinearR_finish";
 }
 
-void PyHuskyLinearR::daemon_train_handler(ITCDaemon & to_worker, BinStream & buffer) {
+void PyHuskyLinearR::daemon_train_handler(ITCDaemon& to_worker, BinStream& buffer) {
     BinStream recv = to_worker.recv_binstream();
     int flag = 1;  // 1 means sent by cpp
     buffer << flag << recv.to_string();

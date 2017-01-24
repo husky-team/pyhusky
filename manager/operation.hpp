@@ -20,7 +20,6 @@
 #include "husky/base/log.hpp"
 #include "husky/base/serialization.hpp"
 
-
 namespace husky {
 
 using base::BinStream;
@@ -30,21 +29,18 @@ BinStream& operator>>(BinStream& stream, Operation& op);
 BinStream& operator<<(BinStream& stream, Operation& op);
 
 class Operation {
-  private:
+   private:
     friend class TestOp;
-  public:
+
+   public:
     Operation();
     explicit Operation(const std::string& name);
     explicit Operation(const Operation& op);
     Operation(const std::string& name, const std::map<std::string, std::string>& params);
     friend BinStream& operator>>(BinStream& stream, Operation& op);
     friend BinStream& operator<<(BinStream& stream, Operation& op);
-    std::string const& get_name() const {
-        return op_name;
-    }
-    std::string get_op_name() const {
-        return op_name.substr(0, op_name.length() - 3);
-    }
+    std::string const& get_name() const { return op_name; }
+    std::string get_op_name() const { return op_name.substr(0, op_name.length() - 3); }
     std::string const& get_param(const std::string& key) const {
         try {
             return op_param.at(key);
@@ -53,21 +49,15 @@ class Operation {
             assert(false);
         }
     }
-    std::map<std::string, std::string> const& get_params() const {
-        return op_param;
-    }
-    std::map<std::string, std::string>& get_params() {
-        return op_param;
-    }
+    std::map<std::string, std::string> const& get_params() const { return op_param; }
+    std::map<std::string, std::string>& get_params() { return op_param; }
     std::string const& get_param_or(const std::string& key, const std::string& val) const {
         const auto& iter = op_param.find(key);
         return iter == op_param.end() ? val : iter->second;
     }
-    int get_param_size() {
-        return op_param.size();
-    }
+    int get_param_size() { return op_param.size(); }
 
-  protected:
+   protected:
     std::string op_name;
     std::map<std::string, std::string> op_param;
 };

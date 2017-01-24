@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "itc.hpp"
+#include "manager/itc.hpp"
 
 #include <string>
-#include "base/log.hpp"
 
+#include "husky/base/log.hpp"
 
 namespace husky {
-// #define ITCTEST
 
 #ifdef ITCTEST
 zmq::context_t& ITCDaemon::get_zmq_context() {
@@ -27,21 +26,17 @@ zmq::context_t& ITCDaemon::get_zmq_context() {
     return ctx;
 }
 #else
-zmq::context_t& ITCDaemon::get_zmq_context() {
-    return *(Context::get_zmq_context());
-}
+zmq::context_t& ITCDaemon::get_zmq_context() { return *(Context::get_zmq_context()); }
 #endif
 
-PendingData::PendingData(void * data, std::function<void(void*)> finalizer):_data(data), _final(finalizer) {}
+PendingData::PendingData(void* data, std::function<void(void*)> finalizer) : _data(data), _final(finalizer) {}
 
-PendingData::PendingData(PendingData&& d):_data(d._data), _final(d._final) {
+PendingData::PendingData(PendingData&& d) : _data(d._data), _final(d._final) {
     d._data = nullptr;
     d._final = nullptr;
 }
 
-void * PendingData::data() {
-    return _data;
-}
+void* PendingData::data() { return _data; }
 
 PendingData::~PendingData() {
     if (_data) {
@@ -50,14 +45,12 @@ PendingData::~PendingData() {
 }
 
 /**
-* if sending int or long, it is better to directly send them 
+* if sending int or long, it is better to directly send them
 */
 const char* ITCDaemon::daemon_addr = "inproc://husky-daemon";
 const char* ITCDaemon::worker_addr = "inproc://husky-worker";
 
-ITCDaemon::ITCDaemon()
-  : _recv(get_zmq_context(), ZMQ_PULL),
-    _send(get_zmq_context(), ZMQ_PUB) {
+ITCDaemon::ITCDaemon() : _recv(get_zmq_context(), ZMQ_PULL), _send(get_zmq_context(), ZMQ_PUB) {
     std::string master_port = Context::get_param("master_port");
     _recv.bind(std::string(daemon_addr) + master_port);
     _send.bind(std::string(worker_addr) + master_port);
@@ -76,7 +69,7 @@ std::string ITCDaemon::recv_string() {
     auto& list = wbox[wid]->content;
     list.pop_front();
     auto& str = list.front();
-    return std::move(*(std::string*)str.data());
+    return std::move(*(std::string*) str.data());
 }
 
 BinStream ITCDaemon::recv_binstream() {
@@ -87,13 +80,9 @@ BinStream ITCDaemon::recv_binstream() {
     return std::move(*static_cast<BinStream*>(bin.data()));
 }
 
-void ITCDaemon::broadcast(const std::string& s) {
-    zmq_send_string(&_send, s);
-}
+void ITCDaemon::broadcast(const std::string& s) { zmq_send_string(&_send, s); }
 
-void ITCDaemon::broadcast(const BinStream& b) {
-    zmq_send_binstream(&_send, b);
-}
+void ITCDaemon::broadcast(const BinStream& b) { zmq_send_binstream(&_send, b); }
 
 ITCDaemon::~ITCDaemon() {
     for (auto& i : wbox)
@@ -103,10 +92,8 @@ ITCDaemon::~ITCDaemon() {
     _recv.close();
 }
 
-ITCWorker::ITCWorker(int wid):
-    id(wid),
-    _send(ITCDaemon::get_zmq_context(), ZMQ_PUSH),
-    _recv(ITCDaemon::get_zmq_context(), ZMQ_SUB) {
+ITCWorker::ITCWorker(int wid)
+    : id(wid), _send(ITCDaemon::get_zmq_context(), ZMQ_PUSH), _recv(ITCDaemon::get_zmq_context(), ZMQ_SUB) {
     std::string master_port = Context::get_param("master_port");
     _send.connect(std::string(ITCDaemon::daemon_addr) + master_port);
     _recv.connect(std::string(ITCDaemon::worker_addr) + master_port);
@@ -116,33 +103,25 @@ ITCWorker::ITCWorker(int wid):
     content.push_back(PendingData(nullptr, nullptr));
 }
 
-void ITCWorker::sendmore(std::string&& str) {
-    send(std::move(str), ZMQ_SNDMORE);
-}
+void ITCWorker::sendmore(std::string&& str) { send(std::move(str), ZMQ_SNDMORE); }
 /**
  * Send a quota to daemon saying I have a thing sent to you
  */
 void ITCWorker::send(std::string&& str, int flag) {
-    content.push_back(PendingData(
-        static_cast<void*>(new std::string(std::move(str))),
-        [](void* p){delete static_cast<std::string*>(p);}));
+    content.push_back(PendingData(static_cast<void*>(new std::string(std::move(str))),
+                                  [](void* p) { delete static_cast<std::string*>(p); }));
     zmq_send_int32(&_send, id, flag);
 }
 
 void ITCWorker::send(BinStream&& bin, int flag) {
-    content.push_back(PendingData(
-        static_cast<void*>(new BinStream(std::move(bin))),
-        [](void* p){delete static_cast<BinStream*>(p);}));
+    content.push_back(PendingData(static_cast<void*>(new BinStream(std::move(bin))),
+                                  [](void* p) { delete static_cast<BinStream*>(p); }));
     zmq_send_int32(&_send, id, flag);
 }
 
-std::string ITCWorker::recv_string() {
-    return zmq_recv_string(&_recv);
-}
+std::string ITCWorker::recv_string() { return zmq_recv_string(&_recv); }
 
-BinStream ITCWorker::recv_binstream() {
-    return zmq_recv_binstream(&_recv);
-}
+BinStream ITCWorker::recv_binstream() { return zmq_recv_binstream(&_recv); }
 
 ITCWorker::~ITCWorker() {
     _send.close();

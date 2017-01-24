@@ -21,14 +21,15 @@
 #include <vector>
 
 #include "husky/base/serialization.hpp"
-#include "opdag.hpp"
+
+#include "manager/opdag.hpp"
 
 namespace husky {
 
 class Job {
-  private:
-    #define Ptr std::shared_ptr
-    static std::unordered_map<std::string, std::function<BinStream(Job&)> > serializers;
+   private:
+#define Ptr std::shared_ptr
+    static std::unordered_map<std::string, std::function<BinStream(Job&)>> serializers;
 
     BinStream stream;
     unsigned num_workers_daemons = 0;
@@ -39,7 +40,7 @@ class Job {
 
     unsigned task_id;
 
-  public:
+   public:
     static void add_serializer(const std::string& suffix, std::function<BinStream(Job&)> serializer) {
         serializers.insert(std::make_pair(suffix, serializer));
     }
@@ -66,7 +67,7 @@ class Job {
 
     unsigned inc_num_working_daemons();
 
-    #undef Ptr
+#undef Ptr
 };
 
 }  // namespace husky

@@ -12,41 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opdag.hpp"
+#include "manager/opdag.hpp"
 
 #include <queue>
 #include <vector>
 
-
 namespace husky {
 
-std::vector<std::shared_ptr<OpNode>>& OpNode::get_deps() {
-    return deps;
-}
+std::vector<std::shared_ptr<OpNode>>& OpNode::get_deps() { return deps; }
 
-const std::vector<std::shared_ptr<OpNode>>& OpNode::get_deps() const {
-    return deps;
-}
+const std::vector<std::shared_ptr<OpNode>>& OpNode::get_deps() const { return deps; }
 
-int OpNode::get_id() const {
-    return id;
-}
+int OpNode::get_id() const { return id; }
 
-Operation& OpNode::get_op() {
-    return op;
-}
+Operation& OpNode::get_op() { return op; }
 
-const Operation& OpNode::get_op() const {
-    return op;
-}
+const Operation& OpNode::get_op() const { return op; }
 
-const std::vector<std::shared_ptr<OpNode>>& OpDAG::get_leaves() const {
-    return leaves;
-}
+const std::vector<std::shared_ptr<OpNode>>& OpDAG::get_leaves() const { return leaves; }
 
-void OpDAG::add_leaf(const std::shared_ptr<OpNode>& leaf) {
-    leaves.push_back(leaf);
-}
+void OpDAG::add_leaf(const std::shared_ptr<OpNode>& leaf) { leaves.push_back(leaf); }
 
 BinStream& operator>>(BinStream& stream, OpDAG& dag) {
     dag.op_nodes.clear();
@@ -151,6 +136,6 @@ void OpDAG::print() {
 
 OpNode::OpNode() {}
 
-OpNode::OpNode(const Operation& oper, int _id):op(oper), id(_id) {}
+OpNode::OpNode(const Operation& oper, int _id) : op(oper), id(_id) {}
 
 }  // namespace husky

@@ -20,11 +20,10 @@
 
 #include "boost/thread.hpp"
 
-#include "threadconnector.hpp"
-
-#include "husky/core/mailbox.hpp"
 #include "husky/base/serialization.hpp"
+#include "husky/core/mailbox.hpp"
 
+#include "backend/threadconnector.hpp"
 
 namespace husky {
 
@@ -32,7 +31,7 @@ using base::BinStream;
 
 /// \brief DaemonInfo stores information needed by daemon
 struct DaemonInfo {
-    explicit DaemonInfo(std::string _config_file): config_file(_config_file) {}
+    explicit DaemonInfo(std::string _config_file) : config_file(_config_file) {}
 
     std::vector<boost::thread*> threads;
     // std::vector<LocalMailbox*> mailboxes;
@@ -51,18 +50,19 @@ struct DaemonInfo {
 
 /// \brief DaemonDriver runs the daemon
 class DaemonDriver {
-public:
+   public:
     static bool init_with_args(int ac, char** av, const std::vector<std::string>& customized);
-    static void daemon_run(int argc, char ** argv, std::vector<std::string> args);
-    static void job(const std::string & config_file);
+    static void daemon_run(int argc, char** argv, std::vector<std::string> args);
+    static void job(const std::string& config_file);
     static void init_daemon_handler_map();
     static void start_workers(DaemonInfo&);
-    static void add_new_handler(const std::string &, std::function<void(DaemonInfo&)>);
+    static void add_new_handler(const std::string&, std::function<void(DaemonInfo&)>);
     // operators
     static void session_begin(DaemonInfo& daemon_info);
     static void session_end(DaemonInfo& daemon_info);
     static void new_instr_py(DaemonInfo& daemon_info);
-private:
+
+   private:
     static std::unordered_map<std::string, std::function<void(DaemonInfo&)>> daemon_handler_map;
 };
 

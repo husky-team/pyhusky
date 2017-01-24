@@ -12,27 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "backend/library/svm.hpp"
+
 #include <map>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "backend/library/svm.hpp"
+#include "husky/base/log.hpp"
+#include "husky/core/context.hpp"
+#include "husky/core/engine.hpp"
+#include "husky/core/utils.hpp"
+#include "husky/core/zmq_helpers.hpp"
+#include "husky/lib/ml/data_loader.hpp"
+#include "husky/lib/ml/feature_label.hpp"
+#include "husky/lib/ml/parameter.hpp"
+#include "husky/lib/ml/vector_linalg.hpp"
+
 #include "backend/pythonconnector.hpp"
 #include "backend/threadconnector.hpp"
 #include "backend/workerdriver.hpp"
 #include "manager/itc.hpp"
 #include "manager/operation.hpp"
-
-#include "husky/core/context.hpp"
-#include "husky/core/utils.hpp"
-#include "husky/core/zmq_helpers.hpp"
-#include "husky/base/log.hpp"
-#include "husky/core/engine.hpp"
-#include "husky/lib/ml/data_loader.hpp"
-#include "husky/lib/ml/feature_label.hpp"
-#include "husky/lib/ml/parameter.hpp"
-#include "husky/lib/ml/vector_linalg.hpp"
 
 namespace husky {
 
@@ -60,11 +61,9 @@ void PyHuskySVM::init_cpp_handlers() {
     WorkerDriver::add_handler("SVMModel#SVM_train_py", SVM_train_handler);
 }
 
-void PyHuskySVM::init_daemon_handlers() {
-    ThreadConnector::add_handler("SVMModel#SVM_train", daemon_train_handler);
-}
+void PyHuskySVM::init_daemon_handlers() { ThreadConnector::add_handler("SVMModel#SVM_train", daemon_train_handler); }
 
-void PyHuskySVM::SVM_load_pyhlist_handler(PythonSocket & python_socket, ITCWorker & daemon_socket) {
+void PyHuskySVM::SVM_load_pyhlist_handler(PythonSocket& python_socket, ITCWorker& daemon_socket) {
     LOG_I << "start SVM_load_pyhlist";
 
     LOG_I << "set_model";
@@ -72,21 +71,17 @@ void PyHuskySVM::SVM_load_pyhlist_handler(PythonSocket & python_socket, ITCWorke
     LOG_I << "finish SVM_load_pyhlist";
 }
 
-void PyHuskySVM::SVM_init_handler(const Operation & op,
-        PythonSocket & python_socket,
-        ITCWorker & daemon_socket) {
+void PyHuskySVM::SVM_init_handler(const Operation& op, PythonSocket& python_socket, ITCWorker& daemon_socket) {
     LOG_I << "SVM_init_handler";
 }
 
-void PyHuskySVM::SVM_load_hdfs_handler(const Operation & op,
-        PythonSocket & python_socket,
-        ITCWorker & daemon_socket) {
+void PyHuskySVM::SVM_load_hdfs_handler(const Operation& op, PythonSocket& python_socket, ITCWorker& daemon_socket) {
     LOG_I << "SVM_load_hdfs_handler";
     // overide
     // Get Parameters sent from python
-    const std::string & url = op.get_param("url");
-    const std::string & name = op.get_param("list_name");
-    auto & load_list = husky::ObjListFactory::create_objlist<SparseFeatureLabel>(name);
+    const std::string& url = op.get_param("url");
+    const std::string& name = op.get_param("list_name");
+    auto& load_list = husky::ObjListFactory::create_objlist<SparseFeatureLabel>(name);
 
     // load data
     husky::lib::ml::DataLoader<SparseFeatureLabel> data_loader(husky::lib::ml::kLIBSVMFormat);
@@ -108,7 +103,9 @@ void PyHuskySVM::SVM_load_hdfs_handler(const Operation & op,
     num_samples_agg.update(load_list.get_size());
     AggregatorFactory::sync();
     int num_samples = num_samples_agg.get_value();
-    if (husky::Context::get_global_tid() == 0) { LOG_I << "Training set size = " + std::to_string(num_samples); }
+    if (husky::Context::get_global_tid() == 0) {
+        LOG_I << "Training set size = " + std::to_string(num_samples);
+    }
 
     // Aggregators for regulator, w square and loss
     Aggregator<double> regulator_agg(0.0, [](double& a, const double& b) { a += b; });
@@ -139,7 +136,7 @@ void PyHuskySVM::SVM_load_hdfs_handler(const Operation & op,
             sqr_w = 1 / lambda;
         }
 
-        double eta = 1.0 / (i+1);
+        double eta = 1.0 / (i + 1);
 
         // regularize w in param_list
         if (husky::Context::get_global_tid() == 0) {
@@ -152,26 +149,26 @@ void PyHuskySVM::SVM_load_hdfs_handler(const Operation & op,
         auto& ac = AggregatorFactory::get_channel();
         // calculate gradient
         husky::list_execute(load_list, {}, {&ac}, [&](ObjT& this_obj) {
-           double prod = 0;  // prod = WX * y
-           double y = get_y_(this_obj);
-           std::vector<std::pair<int, double>> X = get_X_(this_obj);
-           for (auto& x : X)
-               prod += bweight[x.first] * x.second;
-           // bias
-           prod += bweight[0];
-           prod *= y;
+            double prod = 0;  // prod = WX * y
+            double y = get_y_(this_obj);
+            std::vector<std::pair<int, double>> X = get_X_(this_obj);
+            for (auto& x : X)
+                prod += bweight[x.first] * x.second;
+            // bias
+            prod += bweight[0];
+            prod *= y;
 
-           if (prod < 1) {  // the data point falls within the margin
-               for (auto& x : X) {
-                   x.second *= y;  // calculate the gradient for each parameter
-                   param_list.update(x.first, eta * x.second / num_samples / lambda);
-               }
-               // update bias
-               param_list.update(0, eta * y / num_samples);
-               loss_agg.update(1 - prod);
-           }
-           sqr_w_agg.update(sqr_w);
-           regulator_agg.update(regulator);
+            if (prod < 1) {  // the data point falls within the margin
+                for (auto& x : X) {
+                    x.second *= y;  // calculate the gradient for each parameter
+                    param_list.update(x.first, eta * x.second / num_samples / lambda);
+                }
+                // update bias
+                param_list.update(0, eta * y / num_samples);
+                loss_agg.update(1 - prod);
+            }
+            sqr_w_agg.update(sqr_w);
+            regulator_agg.update(regulator);
         });
 
         int num_samples = num_samples_agg.get_value();
@@ -179,9 +176,8 @@ void PyHuskySVM::SVM_load_hdfs_handler(const Operation & op,
         regulator = regulator_agg.get_value() / num_samples;
         double loss = lambda / 2 * sqr_w + loss_agg.get_value() / num_samples;
         if (husky::Context::get_global_tid() == 0) {
-            LOG_I << "Iteration " + std::to_string(i+1)
-                    + ": ||w|| = " + std::to_string(sqrt(sqr_w))
-                    + ", loss = " + std::to_string(loss);
+            LOG_I << "Iteration " + std::to_string(i + 1) + ": ||w|| = " + std::to_string(sqrt(sqr_w)) + ", loss = " +
+                         std::to_string(loss);
         }
     }
     auto end = std::chrono::steady_clock::now();
@@ -189,22 +185,20 @@ void PyHuskySVM::SVM_load_hdfs_handler(const Operation & op,
     // Show result
     if (husky::Context::get_global_tid() == 0) {
         param_list.present();
-        LOG_I << 
-            "Time per iter: " +
-            std::to_string(std::chrono::duration_cast<std::chrono::duration<float>>(end - start).count() / num_iter);
+        LOG_I << "Time per iter: " +
+                     std::to_string(std::chrono::duration_cast<std::chrono::duration<float>>(end - start).count() /
+                                    num_iter);
     }
 }
 
-void PyHuskySVM::SVM_train_handler(const Operation & op,
-        PythonSocket & python_socket,
-        ITCWorker & daemon_socket) {
+void PyHuskySVM::SVM_train_handler(const Operation& op, PythonSocket& python_socket, ITCWorker& daemon_socket) {
     // override
     LOG_I << "start SVM_train";
-   
+
     LOG_I << "finish SVM_finish";
 }
 
-void PyHuskySVM::daemon_train_handler(ITCDaemon & to_worker, BinStream & buffer) {
+void PyHuskySVM::daemon_train_handler(ITCDaemon& to_worker, BinStream& buffer) {
     BinStream recv = to_worker.recv_binstream();
     int flag = 1;  // 1 means sent by cpp
     buffer << flag << recv.to_string();

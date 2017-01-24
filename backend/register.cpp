@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "register.hpp"
+#include "backend/register.hpp"
 
-#include "library/functional.hpp"
-#include "library/linear_regression.hpp"
-// #include "backend/library/svm.hpp"
+#include "backend/library/functional.hpp"
+#include "backend/library/linear_regression.hpp"
 #include "backend/library/logistic_regression.hpp"
 
 namespace husky {
+
 void RegisterFunction::register_py_handlers() {
     PyHuskyFunctional::init_py_handlers();
     PyHuskyLinearR::init_py_handlers();
@@ -28,9 +28,9 @@ void RegisterFunction::register_py_handlers() {
 }
 
 void RegisterFunction::register_cpp_handlers() {
-	PyHuskyLinearR::init_cpp_handlers();
-	// PyHuskySVM::init_cpp_handlers();
-	PyHuskyLogisticR::init_cpp_handlers();
+    PyHuskyLinearR::init_cpp_handlers();
+    // PyHuskySVM::init_cpp_handlers();
+    PyHuskyLogisticR::init_cpp_handlers();
 }
 
 void RegisterFunction::register_daemon_handlers() {
