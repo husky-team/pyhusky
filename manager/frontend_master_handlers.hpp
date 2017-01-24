@@ -23,8 +23,13 @@
 namespace husky {
 
 struct Progress {
-    unsigned worker_finished = 0;
-    unsigned num_tot_worker = 0;
+    Progress() : worker_finished(0), num_tot_worker(0) {}
+    Progress(unsigned int a, unsigned int b) : worker_finished(a), num_tot_worker(b) {}
+    Progress(const Progress& p)
+      : worker_finished(p.worker_finished),
+        num_tot_worker(p.num_tot_worker) {}
+    unsigned int worker_finished;
+    unsigned int num_tot_worker;
 };
 
 class FrontendMasterHandlers {
