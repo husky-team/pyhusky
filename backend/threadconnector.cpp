@@ -12,49 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "threadconnector.hpp"
-#include "register.hpp"
+#include "backend/threadconnector.hpp"
 
-#include "husky/core/context.hpp"
-#include "husky/core/zmq_helpers.hpp"
 #include "husky/base/log.hpp"
 #include "husky/base/serialization.hpp"
+#include "husky/core/context.hpp"
+#include "husky/core/zmq_helpers.hpp"
+
+#include "backend/register.hpp"
 
 namespace husky {
 
-std::unordered_map<std::string, 
-    std::function<void(ITCDaemon&, BinStream&)>> ThreadConnector::handler_map;
+std::unordered_map<std::string, std::function<void(ITCDaemon&, BinStream&)>> ThreadConnector::handler_map;
 
-ThreadConnector::ThreadConnector() {
-}
+ThreadConnector::ThreadConnector() {}
 
 void ThreadConnector::register_handler() {
     // Register all the handlers
     husky::RegisterFunction::register_daemon_handlers();
 }
 
-void ThreadConnector::add_handler(const std::string& name,
-        std::function<void(ITCDaemon&, BinStream&)> handler) {
+void ThreadConnector::add_handler(const std::string& name, std::function<void(ITCDaemon&, BinStream&)> handler) {
     assert(handler_map.find(name) == handler_map.end() && "handler exists");
     handler_map[name] = handler;
 }
 
-void ThreadConnector::start() {
-    to_worker = new ITCDaemon;
-}
+void ThreadConnector::start() { to_worker = new ITCDaemon; }
 
 void ThreadConnector::close() {
     delete to_worker;
     to_worker = nullptr;
 }
 
-ITCWorker & ThreadConnector::new_itc_worker(int id) {
-    return to_worker->new_itc_worker(id);
-}
+ITCWorker& ThreadConnector::new_itc_worker(int id) { return to_worker->new_itc_worker(id); }
 
-ITCDaemon & ThreadConnector::get_itc_connector() {
-    return *to_worker;
-}
+ITCDaemon& ThreadConnector::get_itc_connector() { return *to_worker; }
 
 void ThreadConnector::broadcast_to_threads(std::string& instr) {
     // for (int i=0; i<passers.size(); ++i) {
@@ -77,12 +69,12 @@ void ThreadConnector::listen_from_threads(BinStream& buffer) {
         if (instr == "instr_end") {
             ++num_finished_workers;
             if (num_finished_workers == num_local_workers)
-            break;
+                break;
         } else {
             if (handler_map.find(instr) != handler_map.end()) {
                 handler_map[instr](*(this->to_worker), buffer);
             } else {
-                throw std::runtime_error("Weird message received in ThreadConnector: "+instr);
+                throw std::runtime_error("Weird message received in ThreadConnector: " + instr);
             }
         }
     }

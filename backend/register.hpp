@@ -12,17 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-# pragma once
+#pragma once
 
 namespace husky {
 
-class PythonConnector;
-class ThreadConnector;
-
 class RegisterFunction {
-public:
+   public:
     static void register_py_handlers();
     static void register_cpp_handlers();
     static void register_daemon_handlers();
 };
+
 }  // namespace husky

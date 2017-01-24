@@ -15,6 +15,7 @@
 #pragma once
 
 #include <string>
+
 #include "husky/base/serialization.hpp"
 
 namespace husky {
@@ -22,23 +23,21 @@ namespace husky {
 using base::BinStream;
 
 class ReduceObject {
-public:
+   public:
     typedef std::string KeyT;
     std::string key;
 
     explicit ReduceObject(KeyT key) { this->key = key; }
-
     const KeyT& id() const { return key; }
 };
 
 class GeneralObject {
-public:
+   public:
     typedef int KeyT;
     int key;
 
     explicit GeneralObject(KeyT key) { this->key = key; }
-    
-    virtual KeyT const & id() const { return key; }
+    virtual KeyT const& id() const { return key; }
 };
 
 class PythonConnector;
@@ -48,32 +47,26 @@ class PythonSocket;
 class ThreadConnector;
 
 class PyHuskyFunctional {
-public:
+   public:
     static void init_py_handlers();
     static void init_daemon_handlers();
 
-protected:
+   protected:
     // thread handlers
-    static void reduce_end_handler(PythonSocket & python_socket,
-            ITCWorker & daemon_socket);  // to handle reduce_end
-    static void count_end_handler(PythonSocket & python_socket,
-            ITCWorker & daemon_socket);  // to handle count_end
-    static void collect_end_handler(PythonSocket & python_socket,
-            ITCWorker & daemon_socket);  // to handle collect_end
-    static void reduce_by_key_handler(PythonSocket & python_socket,
-            ITCWorker & daemon_socket);  // to handle reduce(group)_by_key
-    static void reduce_by_key_end_handler(PythonSocket & python_socket,
-            ITCWorker & daemon_socket);  // to handle reduce(group)_by_key_end
-    static void distinct_handler(PythonSocket & python_socket,
-            ITCWorker & daemon_socket);  // to handle distinct
-    static void distinct_end_handler(PythonSocket & python_socket,
-            ITCWorker & daemon_socket);  // to handle distinct_end
-    static void difference_handler(PythonSocket & python_socket,
-            ITCWorker & daemon_socket);  // to handle difference
-    static void difference_end_handler(PythonSocket & python_socket,
-            ITCWorker & daemon_socket);  // to handle difference_end
-    static void write_to_hdfs_handler(PythonSocket & python_socket,
-            ITCWorker & daemon_socket);  // to handle write_to_hdfs
+    static void reduce_end_handler(PythonSocket& python_socket, ITCWorker& daemon_socket);   // to handle reduce_end
+    static void count_end_handler(PythonSocket& python_socket, ITCWorker& daemon_socket);    // to handle count_end
+    static void collect_end_handler(PythonSocket& python_socket, ITCWorker& daemon_socket);  // to handle collect_end
+    static void reduce_by_key_handler(PythonSocket& python_socket,
+                                      ITCWorker& daemon_socket);  // to handle reduce(group)_by_key
+    static void reduce_by_key_end_handler(PythonSocket& python_socket,
+                                          ITCWorker& daemon_socket);  // to handle reduce(group)_by_key_end
+    static void distinct_handler(PythonSocket& python_socket, ITCWorker& daemon_socket);      // to handle distinct
+    static void distinct_end_handler(PythonSocket& python_socket, ITCWorker& daemon_socket);  // to handle distinct_end
+    static void difference_handler(PythonSocket& python_socket, ITCWorker& daemon_socket);    // to handle difference
+    static void difference_end_handler(PythonSocket& python_socket,
+                                       ITCWorker& daemon_socket);  // to handle difference_end
+    static void write_to_hdfs_handler(PythonSocket& python_socket,
+                                      ITCWorker& daemon_socket);  // to handle write_to_hdfs
 
     // daemon handlers
     static void daemon_functional_end_handler(ITCDaemon&, BinStream&);

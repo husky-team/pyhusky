@@ -18,17 +18,16 @@
 
 #include "boost/thread.hpp"
 
-#include "daemondriver.hpp"
-#include "workerdriver.hpp"
-
-#include "husky/core/config.hpp"
-#include "husky/core/context.hpp"
-#include "husky/core/constants.hpp"
-#include "husky/core/worker_info.hpp"
-#include "husky/core/mailbox.hpp"
-
-#include "husky/base/session_local.hpp"
 #include "husky/base/log.hpp"
+#include "husky/base/session_local.hpp"
+#include "husky/core/config.hpp"
+#include "husky/core/constants.hpp"
+#include "husky/core/context.hpp"
+#include "husky/core/mailbox.hpp"
+#include "husky/core/worker_info.hpp"
+
+#include "backend/daemondriver.hpp"
+#include "backend/workerdriver.hpp"
 
 namespace husky {
 
@@ -50,7 +49,7 @@ bool DaemonDriver::init_with_args(int ac, char** av, const std::vector<std::stri
     return success;
 }
 
-void DaemonDriver::daemon_run(int argc, char ** argv, std::vector<std::string> args) {
+void DaemonDriver::daemon_run(int argc, char** argv, std::vector<std::string> args) {
     if (init_with_args(argc, argv, args)) {
         DaemonInfo daemon_info(argv[2]);
         daemon_info.init_param_ac = argc;
@@ -61,7 +60,7 @@ void DaemonDriver::daemon_run(int argc, char ** argv, std::vector<std::string> a
         // Initialize coordinator
         Context::get_coordinator()->serve();
 
-        while(true) {
+        while (true) {
             // ask master task
             BinStream bin_proc_id;
             bin_proc_id << Context::get_worker_info().get_process_id();
@@ -90,7 +89,7 @@ void DaemonDriver::init_daemon_handler_map() {
     daemon_handler_map["new_instr_py"] = new_instr_py;
 }
 
-void DaemonDriver::add_new_handler(const std::string & key, std::function<void(DaemonInfo&)> handler) {
+void DaemonDriver::add_new_handler(const std::string& key, std::function<void(DaemonInfo&)> handler) {
     daemon_handler_map[key] = handler;
 }
 
@@ -106,8 +105,8 @@ void DaemonDriver::start_workers(DaemonInfo& daemon_info) {
     for (int i = 0; i < worker_info.get_num_workers(); i++) {
         if (worker_info.get_process_id(i) != worker_info.get_process_id())
             continue;
-  
-        auto & to_daemon = daemon_info.thread_connector.new_itc_worker(local_id);
+
+        auto& to_daemon = daemon_info.thread_connector.new_itc_worker(local_id);
         daemon_info.threads.push_back(new boost::thread([=, &zmq_context, &daemon_info, &to_daemon]() {
             Context::set_local_tid(local_id);
             Context::set_global_tid(i);

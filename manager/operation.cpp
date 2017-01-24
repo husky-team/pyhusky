@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "operation.hpp"
+#include "manager/operation.hpp"
 
 #include <map>
 #include <string>
@@ -42,11 +42,11 @@ BinStream& operator<<(BinStream& stream, Operation& op) {
 
 Operation::Operation() {}
 
-Operation::Operation(const std::string& name):op_name(name) {}
+Operation::Operation(const std::string& name) : op_name(name) {}
 
-Operation::Operation(const std::string& name,
-    const std::map<std::string, std::string>& params):op_name(name), op_param(params) {}
+Operation::Operation(const std::string& name, const std::map<std::string, std::string>& params)
+    : op_name(name), op_param(params) {}
 
-Operation::Operation(const Operation& op):op_name(op.op_name), op_param(op.op_param) {}
+Operation::Operation(const Operation& op) : op_name(op.op_name), op_param(op.op_param) {}
 
 }  // namespace husky

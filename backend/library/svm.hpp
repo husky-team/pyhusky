@@ -28,26 +28,19 @@ class Operation;
 using base::BinStream;
 
 class PyHuskySVM {
-public:
+   public:
     static void init_py_handlers();
     static void init_cpp_handlers();
     static void init_daemon_handlers();
 
-protected:
+   protected:
     // thread handlers
-    static void SVM_load_pyhlist_handler(PythonSocket & python_socket,
-            ITCWorker & daemon_socket);
+    static void SVM_load_pyhlist_handler(PythonSocket& python_socket, ITCWorker& daemon_socket);
 
     // cpp handlers
-    static void SVM_init_handler(const Operation & op,
-            PythonSocket & python_socket,
-            ITCWorker & daemon_socket);
-    static void SVM_load_hdfs_handler(const Operation & op,
-            PythonSocket & python_socket,
-            ITCWorker & daemon_socket);
-    static void SVM_train_handler(const Operation & op,
-            PythonSocket & python_socket,
-            ITCWorker & daemon_socket);
+    static void SVM_init_handler(const Operation& op, PythonSocket& python_socket, ITCWorker& daemon_socket);
+    static void SVM_load_hdfs_handler(const Operation& op, PythonSocket& python_socket, ITCWorker& daemon_socket);
+    static void SVM_train_handler(const Operation& op, PythonSocket& python_socket, ITCWorker& daemon_socket);
 
     // daemon handlers
     static void daemon_train_handler(ITCDaemon&, BinStream&);

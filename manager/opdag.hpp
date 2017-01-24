@@ -18,8 +18,7 @@
 #include <memory>
 #include <vector>
 
-#include "operation.hpp"
-
+#include "manager/operation.hpp"
 
 namespace husky {
 
@@ -33,7 +32,7 @@ BinStream& operator<<(BinStream& stream, OpDAG& dag);
 int _visit_deps(OpNode& node, BinStream& stream, int& id_counter);
 
 class OpNode {
-  public:
+   public:
     OpNode();
     explicit OpNode(const Operation& oper, int _id = -1);
 
@@ -48,14 +47,15 @@ class OpNode {
     friend BinStream& operator>>(BinStream& stream, OpDAG& dag);
     friend BinStream& operator<<(BinStream& stream, OpDAG& dag);
     friend int _visit_deps(OpNode& node, BinStream& stream, int& id_counter);
-  protected:
+
+   protected:
     Operation op;
     std::vector<std::shared_ptr<OpNode>> deps;
     int id = -1;
 };
 
 class OpDAG {
-  public:
+   public:
     friend class Optimizer;
     friend class TestOp;
     void print();
@@ -64,7 +64,8 @@ class OpDAG {
     friend BinStream& operator<<(BinStream& stream, OpDAG& dag);
     OpDAG deepcopy() const;
     void add_leaf(const std::shared_ptr<OpNode>& leaf);
-  protected:
+
+   protected:
     std::unordered_map<int, std::shared_ptr<OpNode>> op_nodes;
     std::vector<std::shared_ptr<OpNode>> leaves;
 };

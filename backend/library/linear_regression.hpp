@@ -14,20 +14,20 @@
 
 #pragma once
 
-#include <memory>
 #include <functional>
+#include <memory>
 
+#include "husky/base/log.hpp"
+#include "husky/base/serialization.hpp"
 #include "husky/core/executor.hpp"
 #include "husky/core/objlist.hpp"
-#include "husky/lib/aggregator_factory.hpp"
 #include "husky/core/zmq_helpers.hpp"
-#include "husky/base/serialization.hpp"
-#include "husky/lib/ml/feature_label.hpp"
+#include "husky/lib/aggregator_factory.hpp"
 #include "husky/lib/ml/data_loader.hpp"
+#include "husky/lib/ml/feature_label.hpp"
 #include "husky/lib/ml/linear_regression.hpp"
 #include "husky/lib/ml/scaler.hpp"
 #include "husky/lib/ml/sgd.hpp"
-#include "husky/base/log.hpp"
 
 #include "backend/pythonconnector.hpp"
 #include "manager/itc.hpp"
@@ -46,50 +46,40 @@ using base::BinStream;
 using husky::lib::ml::ParameterBucket;
 
 class PyHuskyLinearR {
-public:
+   public:
     static void init_py_handlers();
     static void init_cpp_handlers();
     static void init_daemon_handlers();
 
-protected:
+   protected:
     // thread handlers
-    static void LinearR_load_pyhlist_handler(PythonSocket & python_socket,
-            ITCWorker & daemon_socket);
+    static void LinearR_load_pyhlist_handler(PythonSocket& python_socket, ITCWorker& daemon_socket);
 
     // cpp handlers
-    static void LinearR_init_handler(const Operation & op,
-            PythonSocket & python_socket,
-            ITCWorker & daemon_socket);
-    static void LinearR_load_hdfs_handler(const Operation & op,
-            PythonSocket & python_socket,
-            ITCWorker & daemon_socket);
-    static void LinearR_train_handler(const Operation & op,
-            PythonSocket & python_socket,
-            ITCWorker & daemon_socket);
+    static void LinearR_init_handler(const Operation& op, PythonSocket& python_socket, ITCWorker& daemon_socket);
+    static void LinearR_load_hdfs_handler(const Operation& op, PythonSocket& python_socket, ITCWorker& daemon_socket);
+    static void LinearR_train_handler(const Operation& op, PythonSocket& python_socket, ITCWorker& daemon_socket);
 
     // daemon handlers
     static void daemon_train_handler(ITCDaemon&, BinStream&);
 };  // class PyHuskyLinearR
 
 class ModelBase {
-public:
-    virtual ~ModelBase(){}
+   public:
+    virtual ~ModelBase() {}
 };
 
 template <class A>
-class Model: public ModelBase {
-private:
+class Model : public ModelBase {
+   private:
     A* m;
-public:
-    Model(A* model) {
-        m = model;
+
+   public:
+    Model(A* model) { m = model; }
+    ~Model() {
+        // delete m;
     }
-    ~Model(){
-       // delete m;
-    }
-    A* get_model() {
-        return m;
-    }
+    A* get_model() { return m; }
 };
 
 extern thread_local std::map<std::string, std::shared_ptr<ModelBase>> local_SGD_LinearR_model;
@@ -99,27 +89,33 @@ void Linear_create_model_from_url(std::string name, std::string url, husky::lib:
     husky::base::log_msg("create model name: " + name);
 
     typedef husky::lib::ml::LabeledPointHObj<double, double, is_sparse> LabeledPointHObj;
-    auto & load_list = husky::ObjListStore::create_objlist<LabeledPointHObj>(name);
+    auto& load_list = husky::ObjListStore::create_objlist<LabeledPointHObj>(name);
 
     // load data
     int num_features = husky::lib::ml::load_data(url, load_list, data_format);
 
     assert(num_features > 0);
-    local_SGD_LinearR_model[name] = std::make_shared<Model<husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>>>(new husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>(num_features));
-    std::static_pointer_cast<Model<husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>>>(local_SGD_LinearR_model.at(name))->get_model()->report_per_round = true;
+    local_SGD_LinearR_model[name] =
+        std::make_shared<Model<husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>>>(
+            new husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>(num_features));
+    std::static_pointer_cast<
+        Model<husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>>>(
+        local_SGD_LinearR_model.at(name))
+        ->get_model()
+        ->report_per_round = true;
 }
 
 template <bool is_sparse>
-void Linear_create_model_from_pyhuskylist(std::string name, PythonSocket & python_socket, ITCWorker & daemon_socket) {
+void Linear_create_model_from_pyhuskylist(std::string name, PythonSocket& python_socket, ITCWorker& daemon_socket) {
     husky::base::log_msg("create model name: " + name);
 
     typedef husky::lib::ml::LabeledPointHObj<double, double, is_sparse> LabeledPointHObj;
-    auto & load_list = husky::ObjListStore::create_objlist<LabeledPointHObj>(name);
+    auto& load_list = husky::ObjListStore::create_objlist<LabeledPointHObj>(name);
 
     int n_sample = std::stoi(zmq_recv_string(python_socket.pipe_from_python));
 
-    husky::lib::Aggregator<int> n_feature_agg(0, [](int & a, const int & b){a = std::max(a, b);});
-    auto & ac = husky::lib::AggregatorFactory::get_channel();
+    husky::lib::Aggregator<int> n_feature_agg(0, [](int& a, const int& b) { a = std::max(a, b); });
+    auto& ac = husky::lib::AggregatorFactory::get_channel();
 
     int keep_n_feature = 0;
 
@@ -136,7 +132,7 @@ void Linear_create_model_from_pyhuskylist(std::string name, PythonSocket & pytho
         this_obj.y = y;
         load_list.add_object(this_obj);
     }
-  
+
     int num_features = keep_n_feature;
 
     list_execute(load_list, [&](LabeledPointHObj& this_obj) {
@@ -146,8 +142,14 @@ void Linear_create_model_from_pyhuskylist(std::string name, PythonSocket & pytho
     });
 
     assert(num_features > 0);
-    local_SGD_LinearR_model[name] = std::make_shared<Model<husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>>>(new husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>(num_features));
-    std::static_pointer_cast<Model<husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>>>(local_SGD_LinearR_model.at(name))->get_model()->report_per_round = true;
+    local_SGD_LinearR_model[name] =
+        std::make_shared<Model<husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>>>(
+            new husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>(num_features));
+    std::static_pointer_cast<
+        Model<husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>>>(
+        local_SGD_LinearR_model.at(name))
+        ->get_model()
+        ->report_per_round = true;
 }
 
 template <bool is_sparse>
@@ -155,27 +157,43 @@ void Linear_train_model(std::string name, double alpha, int num_iter) {
     husky::base::log_msg("start training name: " + name);
 
     typedef husky::lib::ml::LabeledPointHObj<double, double, is_sparse> LabeledPointHObj;
-    auto & train_list = husky::ObjListStore::get_objlist<LabeledPointHObj>(name);
+    auto& train_list = husky::ObjListStore::get_objlist<LabeledPointHObj>(name);
 
-    int n_feature = std::static_pointer_cast<Model<husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>>>(local_SGD_LinearR_model.at(name))->get_model()->get_num_feature();
+    int n_feature = std::static_pointer_cast<
+                        Model<husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>>>(
+                        local_SGD_LinearR_model.at(name))
+                        ->get_model()
+                        ->get_num_feature();
 
     husky::lib::ml::LinearScaler<double, double, is_sparse> linscaler(n_feature);
     linscaler.fit_transform(train_list);
 
     // train
-    std::static_pointer_cast<Model<husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>>>(local_SGD_LinearR_model.at(name))->get_model()->template train<husky::lib::ml::SGD>(train_list, num_iter, alpha);
+    std::static_pointer_cast<
+        Model<husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>>>(
+        local_SGD_LinearR_model.at(name))
+        ->get_model()
+        ->template train<husky::lib::ml::SGD>(train_list, num_iter, alpha);
 }
 
 template <bool is_sparse>
 BinStream Linear_get_params(std::string name) {
-    int n_param = std::static_pointer_cast<Model<husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>>>(local_SGD_LinearR_model.at(name))->get_model()->get_num_param();
+    int n_param = std::static_pointer_cast<
+                      Model<husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>>>(
+                      local_SGD_LinearR_model.at(name))
+                      ->get_model()
+                      ->get_num_param();
     BinStream result;
     result << n_param;
     assert(n_param > 0);
-    auto params_vec = std::static_pointer_cast<Model<husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>>>(local_SGD_LinearR_model.at(name))->get_model()->get_param();
+    auto params_vec = std::static_pointer_cast<
+                          Model<husky::lib::ml::LinearRegression<double, double, is_sparse, ParameterBucket<double>>>>(
+                          local_SGD_LinearR_model.at(name))
+                          ->get_model()
+                          ->get_param();
     int n = params_vec.get_num_param();
     for (int i = 0; i < n; i++) {
-        result <<params_vec.param_at(i);
+        result << params_vec.param_at(i);
     }
 
     return result;

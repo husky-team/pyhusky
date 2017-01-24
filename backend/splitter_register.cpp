@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "splitter_register.hpp"
+#include "backend/splitter_register.hpp"
+
+#include "manager/opsplitter.hpp"
 
 namespace husky {
 
@@ -45,7 +47,8 @@ void splitter_register() {
     // Logistic Regression
     OperationSplitter::add_splitter("LogisticRegressionModel#LogisticR_init_py", OperationSplitter::load);
     OperationSplitter::add_splitter("LogisticRegressionModel#LogisticR_load_hdfs_py", OperationSplitter::load);
-    OperationSplitter::add_splitter("LogisticRegressionModel#LogisticR_load_pyhlist_py", OperationSplitter::simple_split);
+    OperationSplitter::add_splitter("LogisticRegressionModel#LogisticR_load_pyhlist_py",
+                                    OperationSplitter::simple_split);
     OperationSplitter::add_splitter("LogisticRegressionModel#LogisticR_train_py", OperationSplitter::load);
 }
 }  // namespace husky

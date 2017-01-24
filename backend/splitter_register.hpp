@@ -14,11 +14,8 @@
 
 #pragma once
 
-#include "manager/opsplitter.hpp"
-
 namespace husky {
 
 void splitter_register();
 
 }  // namespace Husky
-

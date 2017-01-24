@@ -12,17 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "optimizer.hpp"
+#include "manager/optimizer.hpp"
 
 #include <vector>
-
 
 namespace husky {
 
 OpDAG Optimizer::concat_pushdown(const OpDAG& input_dag) {
     std::function<void(std::shared_ptr<OpNode>)> remove_concat;
     std::vector<int> concat_nodes;
-    remove_concat = [&remove_concat, &concat_nodes](std::shared_ptr<OpNode> node)->void {
+    remove_concat = [&remove_concat, &concat_nodes](std::shared_ptr<OpNode> node) -> void {
         for (auto dep : node->deps) {
             remove_concat(dep);
         }
@@ -32,8 +31,8 @@ OpDAG Optimizer::concat_pushdown(const OpDAG& input_dag) {
                 concat_nodes.push_back(dep->id);
                 for (auto depdep : dep->get_deps()) {
                     // push concat params up
-                    auto & params = depdep->get_op().get_params();
-                    for (auto & kv : dep->get_op().get_params()) {
+                    auto& params = depdep->get_op().get_params();
+                    for (auto& kv : dep->get_op().get_params()) {
                         if (params.find(kv.first) == params.end()) {
                             params[kv.first] = kv.second;
                         }
@@ -59,8 +58,6 @@ OpDAG Optimizer::concat_pushdown(const OpDAG& input_dag) {
     return output_dag;
 }
 
-OpDAG Optimizer::optimize(const OpDAG& input_dag) {
-    return concat_pushdown(input_dag);
-}
+OpDAG Optimizer::optimize(const OpDAG& input_dag) { return concat_pushdown(input_dag); }
 
 }  // namespace husky

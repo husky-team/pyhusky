@@ -13,35 +13,36 @@
 // limitations under the License.
 
 #pragma once
-#include "manager/itc.hpp"
+
 #include "husky/base/serialization.hpp"
+
+#include "manager/itc.hpp"
 
 namespace husky {
 
 using base::BinStream;
+
 /// \brief DaemonHandler uses ThreadConnector to communicate with threads
 class ThreadConnector {
-public:
+   public:
     ThreadConnector();
     void start();
     void close();
-    ITCWorker & new_itc_worker(int);
-    ITCDaemon & get_itc_connector();
+    ITCWorker& new_itc_worker(int);
+    ITCDaemon& get_itc_connector();
     void broadcast_to_threads(std::string& instr);
     void broadcast_to_threads(BinStream& binstream);
     void listen_from_threads(BinStream& buffer);
 
-    /// register handlers to handle messages from thread 
-    static void add_handler(const std::string&,
-            std::function<void(ITCDaemon&, BinStream&)>);
+    /// register handlers to handle messages from thread
+    static void add_handler(const std::string&, std::function<void(ITCDaemon&, BinStream&)>);
 
     /// Must Invoke at the beginning
     static void register_handler();
 
-private:
-    ITCDaemon *to_worker;
-    static std::unordered_map<std::string, 
-        std::function<void(ITCDaemon&, BinStream&)>> handler_map;
+   private:
+    ITCDaemon* to_worker;
+    static std::unordered_map<std::string, std::function<void(ITCDaemon&, BinStream&)>> handler_map;
 };
 
 }  // namespace husky

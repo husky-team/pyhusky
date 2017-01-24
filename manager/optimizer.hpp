@@ -13,16 +13,15 @@
 // limitations under the License.
 
 #include <vector>
-#include "opdag.hpp"
 
+#include "manager/opdag.hpp"
 
 namespace husky {
 
 class Optimizer {
-public:
+   public:
     static std::vector<OpDAG> DAG_to_trees(const OpDAG& input_dag);
     static OpDAG optimize(const OpDAG& input_dag);
-
     static OpDAG concat_pushdown(const OpDAG& input_dag);
 };
 
