@@ -19,7 +19,7 @@ Download the source code:
 Download Husky source code as a submodule:
 
     git submodule init
-    git submodule update --remote --recursive
+    git submodule update --init --recursive
 
 Do a out-of-source build using CMake:
 

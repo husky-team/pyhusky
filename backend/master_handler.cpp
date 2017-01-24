@@ -71,9 +71,9 @@ void PyHuskyMasterHandlers::new_task_handler() {
     auto master_handler = master.get_socket();
     auto bin_dag = zmq_recv_binstream(master_handler.get());
     OpDAG dag;
-    unsigned task_id;
+    unsigned int task_id;
     bin_dag >> dag >> task_id;
-    unsigned tot = parent->dag_split(Optimizer::optimize(dag), task_id);
+    unsigned int tot = parent->dag_split(Optimizer::optimize(dag), task_id);
     if (tot > 0) {
         parent->task_progress[task_id] = Progress{0, tot * Context::get_worker_info().get_num_workers()};
     }
@@ -83,7 +83,7 @@ void PyHuskyMasterHandlers::query_task_handler() {
     auto& master = Master::get_instance();
     auto master_handler = master.get_socket();
     auto binstream = zmq_recv_binstream(master_handler.get());
-    unsigned task_id;
+    unsigned int task_id;
     binstream >> task_id;
     BinStream reply;
     if (not task_results.empty()) {

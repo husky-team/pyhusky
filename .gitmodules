@@ -1,4 +1,4 @@
 [submodule "husky"]
   path = husky
   url = https://github.com/husky-team/husky.git
-  commit = 1e7fcc3fc64ba3dd2bfe884da797d9072a3cd099
+  commit = 1f1c3cdcb185e295bd43f9d19c62f966258613c2

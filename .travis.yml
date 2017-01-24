@@ -1,0 +1,50 @@
+sudo: required
+
+dist: trusty
+
+language: python  # workaround for not setting CC/CXX with default value
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise
+    packages:
+      - build-essential
+      - cmake
+      - gcc-4.9
+      - g++-4.9
+      - gcc-6
+      - g++-6
+      - clang-format-3.8
+
+before_install:
+  - sudo add-apt-repository -y ppa:kojoley/boost
+  - sudo apt-get -q update
+  - sudo apt-get install -qq software-properties-common
+  - sudo apt-get install -qq build-essential libgoogle-perftools-dev libzmq3-dev mercurial git
+  - sudo apt-get -y install libboost-{chrono,program-options,date-time,thread,system,filesystem,regex,serialization}1.58{-dev,.0}
+
+install:
+  - mkdir tmp
+  - cd tmp
+  - git clone https://github.com/zeromq/cppzmq
+  - cd cppzmq
+  - git reset --hard 4648ebc9643119cff2a433dff4609f1a5cb640ec  # Since only libzmq3-dev can be installed. The new zmq.hpp requires version above 4.
+  - sudo cp zmq.hpp /usr/local/include
+  - cd ../..
+  - rm -rf tmp
+
+matrix:
+  include:
+    - compiler: "gcc-4.9"
+      env: CC=gcc-4.9 CXX=g++-4.9
+    - compiler: "gcc-6"
+      env: CC=gcc-6 CXX=g++-6
+
+script:
+  - mkdir release
+  - cd release
+  - cmake -DCMAKE_BUILD_TYPE=release ..
+  - make -j4 PyHuskyMaster
+  - make -j4 PyHuskyDaemon
