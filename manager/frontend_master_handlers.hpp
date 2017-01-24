@@ -14,6 +14,9 @@
 
 #pragma once
 
+#include <deque>
+#include <vector>
+
 #include "backend/master_handler.hpp"
 #include "manager/job.hpp"
 #include "manager/opdag.hpp"

@@ -136,4 +136,4 @@ void PyHuskyLogisticR::daemon_train_handler(ITCDaemon& to_worker, BinStream& buf
     buffer << flag << recv.to_string();
 }
 
-}  // End of namespace Husky
+}  // namespace husky

@@ -14,8 +14,11 @@
 
 #pragma once
 
+#include <algorithm>
 #include <functional>
+#include <map>
 #include <memory>
+#include <string>
 
 #include "husky/base/log.hpp"
 #include "husky/base/serialization.hpp"
@@ -71,15 +74,13 @@ class ModelBase {
 
 template <class A>
 class Model : public ModelBase {
+   public:
+    explicit Model(A* model) { m = model; }
+    ~Model() {}
+    A* get_model() { return m; }
+
    private:
     A* m;
-
-   public:
-    Model(A* model) { m = model; }
-    ~Model() {
-        // delete m;
-    }
-    A* get_model() { return m; }
 };
 
 extern thread_local std::map<std::string, std::shared_ptr<ModelBase>> local_SGD_LinearR_model;

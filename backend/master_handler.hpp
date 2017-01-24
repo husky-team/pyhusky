@@ -15,6 +15,8 @@
 #pragma once
 
 #include <list>
+#include <string>
+#include <utility>
 
 #include "husky/master/master.hpp"
 

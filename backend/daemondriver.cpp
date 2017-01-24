@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <string>
 #include <thread>
 #include <unordered_map>
 #include <vector>
@@ -114,7 +115,6 @@ void DaemonDriver::start_workers(DaemonInfo& daemon_info) {
             // run the job
             WorkerDriverInfo workerdriver_info(local_id, i, worker_info.get_num_workers(), to_daemon);
             WorkerDriver::worker_run(workerdriver_info);
-
         }));
         local_id += 1;
     }

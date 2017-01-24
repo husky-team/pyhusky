@@ -35,6 +35,12 @@ install:
   - cd ../..
   - rm -rf tmp
 
+before_script:
+  - export PYHUSKY_ROOT=.
+  - export CLANG_FORMAT=clang-format-3.8
+  - ./scripts/lint.py
+  - ./scripts/clang-format.py -o check
+
 matrix:
   include:
     - compiler: "gcc-4.9"

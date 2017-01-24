@@ -14,6 +14,7 @@
 
 #include "backend/library/svm.hpp"
 
+#include <algorithm>
 #include <map>
 #include <string>
 #include <utility>
@@ -42,8 +43,6 @@ using husky::lib::ml::ParameterBucket;
 
 using husky::lib::Aggregator;
 using husky::lib::AggregatorFactory;
-using namespace husky;
-using namespace husky::lib::ml;
 
 typedef SparseFeatureLabel ObjT;
 
@@ -204,4 +203,4 @@ void PyHuskySVM::daemon_train_handler(ITCDaemon& to_worker, BinStream& buffer) {
     buffer << flag << recv.to_string();
 }
 
-}  // End of namespace Husky
+}  // namespace husky

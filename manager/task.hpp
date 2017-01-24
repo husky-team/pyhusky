@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "husky/base/serialization.hpp"
 
 #include "manager/operation.hpp"
