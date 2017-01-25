@@ -12,4 +12,3 @@ degree_distribution = ph.env.load(input_url) \
         .count()
 
 print degree_distribution
-
