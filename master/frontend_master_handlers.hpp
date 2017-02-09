@@ -17,11 +17,12 @@
 #include <deque>
 #include <vector>
 
-#include "backend/master_handler.hpp"
-#include "manager/job.hpp"
-#include "manager/opdag.hpp"
-#include "manager/opsplitter.hpp"
-#include "master/master.hpp"
+#include "husky/master/master.hpp"
+
+#include "backend/opdag.hpp"
+#include "master/job.hpp"
+#include "master/master_handler.hpp"
+#include "master/opsplitter.hpp"
 
 namespace husky {
 

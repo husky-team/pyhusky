@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "manager/optimizer.hpp"
+#include "master/optimizer.hpp"
 
 #include <vector>
 

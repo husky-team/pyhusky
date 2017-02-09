@@ -19,8 +19,8 @@
 #include "husky/base/log.hpp"
 #include "husky/core/zmq_helpers.hpp"
 
+#include "backend/itc.hpp"
 #include "backend/register.hpp"
-#include "manager/itc.hpp"
 
 namespace husky {
 

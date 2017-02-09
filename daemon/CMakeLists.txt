@@ -14,21 +14,9 @@
 
 include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/husky ${HUSKY_EXTERNAL_INCLUDE})
 
-add_library(pyhusky-backend-objs OBJECT 
-    itc.cpp
-    operation.cpp
-    opdag.cpp
-    register.cpp
-    pythonconnector.cpp
-    threadconnector.cpp
-    daemondriver.cpp
-    workerdriver.cpp
-)
-set_property(TARGET pyhusky-backend-objs PROPERTY CXX_STANDARD 14)
-
-add_subdirectory(library)
-
-add_library(pyhusky-backend STATIC
-    $<TARGET_OBJECTS:pyhusky-backend-objs>
-    $<TARGET_OBJECTS:pyhusky-backend-library-objs>)
-set_property(TARGET pyhusky-backend PROPERTY CXX_STANDARD 14)
+add_executable(PyHuskyDaemon pyhusky_daemon.cpp)
+target_link_libraries(PyHuskyDaemon pyhusky-master)
+target_link_libraries(PyHuskyDaemon pyhusky-backend)
+target_link_libraries(PyHuskyDaemon husky)
+target_link_libraries(PyHuskyDaemon ${HUSKY_EXTERNAL_LIB})
+set_property(TARGET PyHuskyDaemon PROPERTY CXX_STANDARD 14)

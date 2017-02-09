@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "manager/frontend_master_handlers.hpp"
+#include "master/frontend_master_handlers.hpp"
 
 namespace husky {
 

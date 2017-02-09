@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/splitter_register.hpp"
+#include "master/splitter_register.hpp"
 
-#include "manager/opsplitter.hpp"
+#include "master/opsplitter.hpp"
 
 namespace husky {
 

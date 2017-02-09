@@ -13,7 +13,8 @@ CPPLINT_LINE_LENGTH = 120
 
 default_dirs = [
     'backend',
-    'manager',
+    'daemon',
+    'master',
 ]
 ignored_dirs = []
 

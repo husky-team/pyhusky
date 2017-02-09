@@ -21,4 +21,5 @@ add_subdirectory(husky)
 add_definitions(${HUSKY_EXTERNAL_DEFINITION})
 
 add_subdirectory(backend)
-add_subdirectory(manager)
+add_subdirectory(daemon)
+add_subdirectory(master)

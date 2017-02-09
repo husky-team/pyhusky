@@ -27,11 +27,11 @@
 #include "husky/io/input/mongodb_inputformat.hpp"
 #endif
 
+#include "backend/opdag.hpp"
+#include "backend/operation.hpp"
 #include "backend/pythonconnector.hpp"
 #include "backend/register.hpp"
 #include "backend/threadconnector.hpp"
-#include "manager/opdag.hpp"
-#include "manager/operation.hpp"
 
 namespace husky {
 

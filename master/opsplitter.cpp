@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "manager/opsplitter.hpp"
+#include "master/opsplitter.hpp"
 
 #include <deque>
 #include <string>

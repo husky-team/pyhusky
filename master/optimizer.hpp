@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "manager/task.hpp"
+#include <vector>
+
+#include "backend/opdag.hpp"
 
 namespace husky {
 
-BinStream& operator>>(BinStream& stream, Task& task) {
-    size_t len;
-    stream >> len;
-    for (int i = 0; i < len; i++) {
-        Operation op;
-        stream >> op;
-        task.op_list.push_back(op);
-    }
-}
+class Optimizer {
+   public:
+    static std::vector<OpDAG> DAG_to_trees(const OpDAG& input_dag);
+    static OpDAG optimize(const OpDAG& input_dag);
+    static OpDAG concat_pushdown(const OpDAG& input_dag);
+};
 
 }  // namespace husky
