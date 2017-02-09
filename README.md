@@ -60,11 +60,11 @@ Then, start a `python` terminal in `$PYHUSKY_ROOT`:
 ```python
     >>> import frontend as ph
     >>> ph.env.pyhusky_start("master", xxxxx)
-    >>> data = [0, 1, 2, 2, 3, 4]
-    >>> data_list = ph.env.parallelize(data)
-    >>> data_list.map(lambda x: (x, 1))
-    >>> data_list.reduce_by_key(lambda x, y: x + y)
-    >>> data_list.output()
+    >>> words = ["hello", "world", "hello", "husky"]
+    >>> word_list = ph.env.parallelize(words)
+    >>> wc = word_list.map(lambda x: (x, 1)).reduce_by_key(lambda x, y: x + y).collect()
+    >>> print wc
+    [('hello', 2), ('husky', 1), ('world', 1)]
 ```
 
 License
