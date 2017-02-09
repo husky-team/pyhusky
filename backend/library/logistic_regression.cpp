@@ -28,11 +28,11 @@
 #include "husky/lib/ml/fgd.hpp"
 #include "husky/lib/ml/logistic_regression.hpp"
 
+#include "backend/itc.hpp"
+#include "backend/operation.hpp"
 #include "backend/pythonconnector.hpp"
 #include "backend/threadconnector.hpp"
 #include "backend/workerdriver.hpp"
-#include "manager/itc.hpp"
-#include "manager/operation.hpp"
 
 namespace husky {
 

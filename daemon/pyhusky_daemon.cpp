@@ -30,11 +30,10 @@ int main(int argc, char** argv) {
 
     // init conf first
     std::vector<std::string> args;
+#ifdef WITH_HDFS
     args.push_back("hdfs_namenode");
     args.push_back("hdfs_namenode_port");
-    args.push_back("n_iter");
-    args.push_back("alpha");
-    args.push_back("lambda");
+#endif
     husky::DaemonDriver::daemon_run(argc, argv, args);
 
     return 0;

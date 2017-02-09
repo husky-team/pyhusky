@@ -19,8 +19,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "manager/job.hpp"
-#include "manager/opdag.hpp"
+#include "backend/opdag.hpp"
+#include "master/job.hpp"
 
 namespace husky {
 

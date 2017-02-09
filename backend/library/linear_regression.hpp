@@ -32,8 +32,8 @@
 #include "husky/lib/ml/scaler.hpp"
 #include "husky/lib/ml/sgd.hpp"
 
+#include "backend/itc.hpp"
 #include "backend/pythonconnector.hpp"
-#include "manager/itc.hpp"
 
 namespace husky {
 

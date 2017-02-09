@@ -23,9 +23,9 @@
 #include "husky/core/zmq_helpers.hpp"
 #include "husky/io/hdfs_manager.hpp"
 
+#include "backend/itc.hpp"
 #include "backend/pythonconnector.hpp"
 #include "backend/threadconnector.hpp"
-#include "manager/itc.hpp"
 
 namespace husky {
 

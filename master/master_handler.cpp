@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "master_handler.hpp"
+#include "master/master_handler.hpp"
 
 #include <string>
 #include <utility>
@@ -21,10 +21,10 @@
 #include "husky/core/constants.hpp"
 #include "husky/core/context.hpp"
 
-#include "backend/splitter_register.hpp"
-#include "manager/frontend_master_handlers.hpp"
-#include "manager/job.hpp"
-#include "manager/optimizer.hpp"
+#include "master/frontend_master_handlers.hpp"
+#include "master/job.hpp"
+#include "master/optimizer.hpp"
+#include "master/splitter_register.hpp"
 
 namespace husky {
 
@@ -139,7 +139,7 @@ void PyHuskyMasterHandlers::request_instruction_handler() {
         no_job = idx == parent->pending_jobs.size();  // this daemon did all pending jobs already
         if (!no_job) {
             time_t now = time(0);
-            std::string msg = std::string("send new job at ") + ctime_r(&now, NULL);
+            std::string msg = std::string("send new job at ") + ctime(&now);  // NOLINT
             msg.back() = '.';  // \n => .
             zmq_send_binstream(master_handler.get(), parent->pending_jobs[idx]->to_bin_stream());
             return;

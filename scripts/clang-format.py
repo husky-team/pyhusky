@@ -9,7 +9,8 @@ import sys
 cpp_suffix = '*.[cht]pp'
 default_dirs = [
     'backend',
-    'manager',
+    'daemon',
+    'master',
 ]
 ignored_dirs = []
 
