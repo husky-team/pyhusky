@@ -14,12 +14,12 @@
 
 import cPickle
 
-import config
-import session
-from huskylist import PyHuskyList, HDFS, MongoDB
-from operation import Operation, OperationParam
-from datareceiver import Receiver
-from backend.python.serializers import Serializer, MarshalSerializer, PickleSerializer, AutoSerializer, CompressedSerializer
+from pyhusky.common.operation import Operation, OperationParam
+from pyhusky.common.serializers import Serializer, MarshalSerializer, PickleSerializer, AutoSerializer, CompressedSerializer
+from pyhusky.frontend import config
+from pyhusky.frontend import session
+from pyhusky.frontend.datareceiver import Receiver
+from pyhusky.frontend.huskylist import PyHuskyList, HDFS, MongoDB
 
 # three types of lists:
 # HuskyList, PyHuskyList, HuskyObjList

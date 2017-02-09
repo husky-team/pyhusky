@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from binstream import BinStream
-from frontend.library.register import register
-from backend.python.serializers import Serializer
+from pyhusky.common.binstream import BinStream
+from pyhusky.common.serializers import Serializer
+from pyhusky.frontend.library.register import register
 
 class Receiver:
     receiver_map = dict()

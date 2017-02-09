@@ -13,18 +13,17 @@
 # limitations under the License.
 
 import cPickle
-import struct
-import zmq
-import time
 import random
+import struct
+import time
+import zmq
 
-import communication
-import config
-import session
-from binstream import BinStream
-from datareceiver import data_receiver
-from operation import Operation
-
+from pyhusky.common.binstream import BinStream
+from pyhusky.common.operation import Operation
+from pyhusky.frontend import communication
+from pyhusky.frontend import config
+from pyhusky.frontend import session
+from pyhusky.frontend.datareceiver import data_receiver
 
 """
 structure of binstream

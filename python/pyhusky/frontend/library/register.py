@@ -12,13 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import communication
-import time
+from pyhusky.frontend.library.linear_regression_receiver import LinearRegressionModelReceiver
+from pyhusky.frontend.library.logistic_regression_receiver import LogisticRegressionModelReceiver
 
-def new_session(master_host, master_port, session_id):
-    communication.init(b'fe'+session_id, "tcp://"+master_host+":"+master_port)
-    communication.send(communication.TYPE_SESSION_BEGIN_PY)
-
-def end_session():
-    time.sleep(1)
-    communication.send(communication.TYPE_SESSION_END_PY)
+def register(receiver_map):
+    LinearRegressionModelReceiver.register(receiver_map)
+    LogisticRegressionModelReceiver.register(receiver_map)

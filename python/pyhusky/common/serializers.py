@@ -14,9 +14,9 @@
 
 import cPickle
 import marshal
+import msgpack
 import sys
 import zlib
-import msgpack
 
 if sys.version < '3':
     import cPickle as pickle

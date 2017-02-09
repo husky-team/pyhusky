@@ -45,20 +45,24 @@ First, run `PyHuskyMaster`:
 
     ./PyHuskyMaster --conf /path/to/your/conf
 
-Second, run `PyHuskyDaemon`:
+Second, set `$PYTHONPATH` environment value:
 
-In the single-machine environment, use the following,
+    export PYTHONPATH=$PYHUSKY_ROOT/python
+
+Run `PyHuskyDaemon` in the single-machine environment:
 
     ./PyHuskyDaemon --conf /path/to/your/conf
 
-In the distributed environment, use the following to execute workers on all machines,
+Run `PyHuskyMaster` in the distributed environment, copy `$PYHUSKY_ROOT/python` to worker machines and set `$PYTHONPATH` like the second step in worker machines at first.
+    
+Then, use `scritps/exec.sh` to execute `PyHuskyDaemon` on all worker machines:
 
-    ./exec.sh PyHuskyDaemon --conf /path/to/your/conf
+    ./scritps/exec.sh PyHuskyDaemon --conf /path/to/your/conf
 
-Then, start a `python` terminal in `$PYHUSKY_ROOT`:
+Last, start a `python` terminal in `$PYHUSKY_ROOT` on your master machine:
 
 ```python
-    >>> import frontend as ph
+    >>> import pyhusky.frontend as ph
     >>> ph.env.pyhusky_start("master", xxxxx)
     >>> words = ["hello", "world", "hello", "husky"]
     >>> word_list = ph.env.parallelize(words)
