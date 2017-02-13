@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import cPickle
-from backend.python.globalvar import GlobalVar, GlobalSocket, OperationParam
+import json
+
+from pyhusky.backend.globalvar import GlobalVar, GlobalSocket, OperationParam
 
 def register_all():
     LogisticModel.register()

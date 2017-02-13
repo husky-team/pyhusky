@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import atexit
 import argparse
+import atexit
 import random
 import string
 
-import session
+from pyhusky.frontend import session
 
 disable_progress = False
 

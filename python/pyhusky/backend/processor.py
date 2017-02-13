@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
+import cPickle
+import cloudpickle
 import json
 import struct
-import cloudpickle
-import cPickle
-from frontend.binstream import BinStream
-from backend.python.globalvar import GlobalVar, GlobalSocket
+import sys
+
+from pyhusky.backend.globalvar import GlobalVar, GlobalSocket
+from pyhusky.common.binstream import BinStream
 
 def log_msg(msg):
     print msg

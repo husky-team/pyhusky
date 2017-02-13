@@ -14,10 +14,10 @@
 
 import numpy as np
 
-from frontend.huskylist import HuskyList
-from frontend.huskylist import PyHuskyList
-from frontend.operation import Operation, OperationParam
-from frontend import scheduler
+from pyhusky.common.operation import Operation, OperationParam
+from pyhusky.frontend import scheduler
+from pyhusky.frontend.huskylist import HuskyList
+from pyhusky.frontend.huskylist import PyHuskyList
 
 class LogisticRegressionModel(HuskyList):
     def __init__(self, n_feature = -1):

@@ -12,16 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-import json
 import cPickle
 import cloudpickle
-from backend.python.globalvar import GlobalVar, GlobalSocket, OperationParam, GlobalN2NSocket
-from backend.python.serializers import Serializer
-from frontend.binstream import BinStream
+import json
+import sys
 
 from itertools import groupby, islice
 from operator import itemgetter
+
+from pyhusky.backend.globalvar import GlobalVar, GlobalSocket, OperationParam, GlobalN2NSocket
+from pyhusky.common.binstream import BinStream
+from pyhusky.common.serializers import Serializer
 
 def register_all():
     # register actions

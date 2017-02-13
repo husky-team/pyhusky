@@ -16,7 +16,7 @@ import cloudpickle
 import struct
 import types
 
-from operation import Operation
+from pyhusky.common.operation import Operation
 
 class BinStream(object):
     def __init__(self):

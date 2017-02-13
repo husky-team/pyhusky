@@ -16,12 +16,10 @@ import random
 import string
 import types
 
-import config
-import session
-from operation import Operation, OperationParam 
-from scheduler import compute, compute_collect
-
-import copy
+from pyhusky.common.operation import Operation, OperationParam 
+from pyhusky.frontend import config
+from pyhusky.frontend import session
+from pyhusky.frontend.scheduler import compute, compute_collect
 
 def gen_list_name():
     list_name_len = 8
@@ -235,4 +233,3 @@ class MongoDB(PyHuskyList):
         }
         self.pending_op = Operation("Functional#load_py", param, [])
         return self
-
