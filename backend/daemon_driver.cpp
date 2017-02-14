@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "backend/daemon_driver.hpp"
+
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -27,8 +29,7 @@
 #include "husky/core/mailbox.hpp"
 #include "husky/core/worker_info.hpp"
 
-#include "backend/daemondriver.hpp"
-#include "backend/workerdriver.hpp"
+#include "backend/worker_driver.hpp"
 
 namespace husky {
 

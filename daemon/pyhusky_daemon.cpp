@@ -15,10 +15,10 @@
 #include <string>
 #include <vector>
 
-#include "backend/daemondriver.hpp"
-#include "backend/pythonconnector.hpp"
-#include "backend/threadconnector.hpp"
-#include "backend/workerdriver.hpp"
+#include "backend/daemon_driver.hpp"
+#include "backend/python_connector.hpp"
+#include "backend/thread_connector.hpp"
+#include "backend/worker_driver.hpp"
 
 int main(int argc, char** argv) {
     husky::WorkerDriver::init_worker_instr_handler_map();

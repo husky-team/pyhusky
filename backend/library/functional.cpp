@@ -24,8 +24,8 @@
 #include "husky/io/hdfs_manager.hpp"
 
 #include "backend/itc.hpp"
-#include "backend/pythonconnector.hpp"
-#include "backend/threadconnector.hpp"
+#include "backend/python_connector.hpp"
+#include "backend/thread_connector.hpp"
 
 namespace husky {
 

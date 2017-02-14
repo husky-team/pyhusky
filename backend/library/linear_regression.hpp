@@ -33,7 +33,7 @@
 #include "husky/lib/ml/sgd.hpp"
 
 #include "backend/itc.hpp"
-#include "backend/pythonconnector.hpp"
+#include "backend/python_connector.hpp"
 
 namespace husky {
 

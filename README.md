@@ -36,7 +36,7 @@ We assume the root directory of PyHusky is `$PYHUSKY_ROOT`. Go to `$PYHUSKY_ROOT
 Configuration
 -------------
 
-It is the same as configuration for Husky. See (Config-How-to)[https://github.com/husky-team/husky/wiki/Config-How-to].
+It is the same configuration as Husky. See (Config-How-to)[https://github.com/husky-team/husky/wiki/Config-How-to].
 
 Example to run:
 -------------

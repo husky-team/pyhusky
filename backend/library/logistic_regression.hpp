@@ -28,7 +28,7 @@
 #include "husky/lib/ml/logistic_regression.hpp"
 
 #include "backend/itc.hpp"
-#include "backend/pythonconnector.hpp"
+#include "backend/python_connector.hpp"
 
 namespace husky {
 
