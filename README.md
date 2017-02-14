@@ -71,6 +71,8 @@ Last, start a `python` terminal in `$PYHUSKY_ROOT` on your master machine:
     [('hello', 2), ('husky', 1), ('world', 1)]
 ```
 
+Or you can run `$ python examples/simple_wc.py` directly.
+
 License
 ---------------
 
