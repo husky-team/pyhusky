@@ -15,14 +15,7 @@
 import pyhusky.frontend as ph
 
 ph.env.pyhusky_start("master", 8808)
-
-input_url = "hdfs:///datasets/graph/twitter-adj"
-degree_distribution = ph.env.load(input_url) \
-        .flat_map(lambda line:line.split()[2:]) \
-        .map(lambda dst:(dst,1)) \
-        .reduce_by_key(lambda x,y:x+y) \
-        .map(lambda (k,v):(v,1)) \
-        .reduce_by_key(lambda x,y:x+y) \
-        .count()
-
-print degree_distribution
+words = ["hello", "world", "hello", "husky"]
+word_list = ph.env.parallelize(words)
+wc = word_list.map(lambda x: (x, 1)).reduce_by_key(lambda x, y: x + y).collect()
+print wc

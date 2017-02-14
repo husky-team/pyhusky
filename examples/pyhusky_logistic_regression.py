@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import numpy as np
-import frontend as ph
-from frontend.library.logistic_regression import LogisticRegressionModel
+
+from pyhusky.frontend.library.logistic_regression import LogisticRegressionModel
+import pyhusky.frontend as ph
 
 ph.env.pyhusky_start()
 

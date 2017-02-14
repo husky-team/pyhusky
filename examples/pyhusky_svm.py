@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import numpy as np
-import frontend as ph
-from frontend.library.svm import SVMModel
+
+from pyhusky.frontend.library.svm import SVMModel
+import pyhusky.frontend as ph
 
 ph.env.pyhusky_start()
 

@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import numpy as np
-import frontend as ph
-from frontend.library.linear_regression import LinearRegressionModel
+
+from pyhusky.frontend.library.linear_regression import LinearRegressionModel
+import pyhusky.frontend as ph
 
 ph.env.pyhusky_start()
 
