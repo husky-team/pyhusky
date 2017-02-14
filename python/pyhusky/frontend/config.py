@@ -27,7 +27,7 @@ def log_msg(msgs):
     print msgs
 
 
-class Config:
+class Config(object):
     """self.params is used for pass some parameters to frontend.
     params:
         disable_progress:True/False (False by default)
@@ -36,17 +36,16 @@ class Config:
     pyhusky_start(params={disable_progress:True})
 
     """
-    def __init__(self):
-        self.master_host = None
-        self.master_port = None
-        self.session_id = None
-        self._params = None
-
     def __init__(self, _master_host, _master_port, _params={}):
         """master_host and master_port can be provided in two ways:
         1, use command line arguments, and then use pyhusky_start()
         2, use pyhusky_start(master_host, master_port)
         """
+        self.master_host = None
+        self.master_port = None
+        self.session_id = None
+        self._params = None
+
         if _master_host is None and _master_port is None:
             parser = argparse.ArgumentParser()
             parser.add_argument('--host', type=str, required=True)
@@ -61,7 +60,7 @@ class Config:
         session_id_len = 8
         self.session_id = ''.join(random.choice(string.ascii_lowercase+string.digits) for _ in range(session_id_len))
 
-        assert type(_params) is dict
+        assert isinstance(_params, dict)
         self.params = _params
         global disable_progress
         disable_progress = self.params.get("disable_progress", False)
@@ -72,7 +71,7 @@ class Config:
 
     def __repr__(self):
         return ("master_host: " + self.master_host
-              + "\nmaster_port: " + self.master_port
-              + "\nsession_id: " + self.session_id)
+                + "\nmaster_port: " + self.master_port
+                + "\nsession_id: " + self.session_id)
 
 conf = None

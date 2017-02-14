@@ -12,19 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import cPickle
-import cloudpickle
-import json
-import sys
-
 from itertools import groupby, islice
-from operator import itemgetter
+
+import cloudpickle
 
 from pyhusky.backend.globalvar import GlobalVar, GlobalSocket, OperationParam, GlobalN2NSocket
-from pyhusky.common.binstream import BinStream
 from pyhusky.common.serializers import Serializer
 
 def register_all():
+    """
+        Actions:
+            Load, Reduce, Cache, UnCache, ReduceByKey, GroupByKey, WriteToHdfs,
+            Count, Collect, Parallelize, Distinct, Difference
+        Transformations:
+            Map, Filter, FlatMap
+    """
     # register actions
     Load.register()
     Reduce.register()
@@ -46,31 +48,27 @@ def register_all():
     Filter.register()
     FlatMap.register()
 
-"""Actions:
-    Load, Reduce, Cache, UnCache, ReduceByKey, GroupByKey, WriteToHdfs,
-    Count, Collect, Parallelize, Distinct, Difference
-"""
-class Load:
+class Load(object):
     @staticmethod
     def register():
-        if GlobalVar.disablePipeline == False:
+        if not GlobalVar.disablePipeline:
             GlobalVar.name_to_func["Functional#load_py"] = Load.load
         else:
             GlobalVar.name_to_func["Functional#load_py"] = Load.load_disablepipeline
         GlobalVar.name_to_type["Functional#load_py"] = GlobalVar.loadtype
 
     @staticmethod
-    def load(op):
+    def load(_):
         while True:
             chunk = GlobalSocket.pipe_from_cpp.recv()
             if not chunk:
                 break
             else:
                 GlobalSocket.pipe_to_cpp.send("")
-                yield chunk.split("\n");
+                yield chunk.split("\n")
 
     @staticmethod
-    def load_disablepipeline(op):
+    def load_disablepipeline(_):
         # disable pipeline
         ret = []
         while True:
@@ -81,7 +79,7 @@ class Load:
                 ret.append(chunk)
         yield ret
 
-class Reduce:
+class Reduce(object):
     @staticmethod
     def register():
         GlobalVar.name_to_func["Functional#reduce_py"] = Reduce.func
@@ -115,7 +113,7 @@ class Reduce:
             GlobalVar.reduce_res = op.func(GlobalVar.reduce_res, op.res)
 
     @staticmethod
-    def end_postfunc(op):
+    def end_postfunc(_):
         GlobalSocket.pipe_to_cpp.send("Functional#reduce_end")
         GlobalSocket.pipe_to_cpp.send(Serializer.dumps(GlobalVar.reduce_res))
         res = None
@@ -136,7 +134,7 @@ class Reduce:
         GlobalVar.reduce_res = None
         GlobalVar.reduce_func = None
 
-class Count:
+class Count(object):
     @staticmethod
     def register():
         GlobalVar.name_to_func["Functional#count_py"] = Count.func
@@ -158,12 +156,12 @@ class Count:
     def postfunc(op):
         GlobalVar.count_res += op.res
     @staticmethod
-    def end_postfunc(op):
+    def end_postfunc(_):
         GlobalSocket.pipe_to_cpp.send("Functional#count_end")
         GlobalSocket.pipe_to_cpp.send(str(GlobalVar.count_res))
         GlobalVar.count_res = 0
 
-class Collect:
+class Collect(object):
     @staticmethod
     def register():
         GlobalVar.name_to_func["Functional#collect_py"] = Collect.func
@@ -173,20 +171,20 @@ class Collect:
         GlobalVar.name_to_postfunc["Functional#collect_end_py"] = Collect.end_postfunc
         GlobalVar.name_to_type["Functional#collect_end_py"] = GlobalVar.actiontype
     @staticmethod
-    def prefunc(op):
+    def prefunc(_):
         if "collect_list" not in GlobalVar.data_chunk:
             GlobalVar.data_chunk["collect_list"] = []
     @staticmethod
-    def func(op, data):
+    def func(_, data):
         GlobalVar.data_chunk["collect_list"].extend(data)
     @staticmethod
-    def end_postfunc(op):
+    def end_postfunc(_):
         GlobalSocket.pipe_to_cpp.send("Functional#collect_end")
         GlobalSocket.pipe_to_cpp.send("collect_list")
         GlobalSocket.pipe_to_cpp.send(Serializer.dumps(GlobalVar.data_chunk["collect_list"]))
         del GlobalVar.data_chunk["collect_list"]
 
-class MapPartition:
+class MapPartition(object):
     @staticmethod
     def register():
         GlobalVar.name_to_prefunc["Functional#map_partition_py"] = MapPartition.prefunc
@@ -209,17 +207,17 @@ class MapPartition:
         ret = op.func(partition)
         GlobalVar.data_chunk[op.op_param[OperationParam.list_str]] = []
         print "[Debug] ret "+str(ret)
-        assert type(ret) is list
+        assert isinstance(ret, list)
         return [ret]
 
-class Cache:
+class Cache(object):
     @staticmethod
     def register():
         GlobalVar.name_to_func["Functional#cache_py"] = Cache.func
         GlobalVar.name_to_prefunc["Functional#cache_py"] = Cache.prefunc
         GlobalVar.name_to_type["Functional#cache_py"] = GlobalVar.actiontype
 
-        if GlobalVar.disablePipeline == False:
+        if not GlobalVar.disablePipeline:
             GlobalVar.name_to_func["Functional#load_cache_py"] = Cache.load
         else:
             GlobalVar.name_to_func["Functional#load_cache_py"] = Cache.load_disablepipeline
@@ -245,7 +243,7 @@ class Cache:
         yield GlobalVar.data_chunk[op.op_param[OperationParam.list_str]]
 
 
-class UnCache:
+class UnCache(object):
     @staticmethod
     def register():
         GlobalVar.name_to_postfunc["Functional#uncache_py"] = UnCache.postfunc
@@ -254,7 +252,7 @@ class UnCache:
     def postfunc(op):
         GlobalVar.data_chunk[op.op_param[OperationParam.list_str]] = None
 
-class ReduceByKey:
+class ReduceByKey(object):
     @staticmethod
     def register():
         GlobalVar.name_to_func["Functional#reduce_by_key_py"] = ReduceByKey.func_hashmap
@@ -262,16 +260,16 @@ class ReduceByKey:
         GlobalVar.name_to_postfunc["Functional#reduce_by_key_py"] = ReduceByKey.postfunc_combine_n2n
         GlobalVar.name_to_type["Functional#reduce_by_key_py"] = GlobalVar.actiontype
 
-        if GlobalVar.disablePipeline == False:
+        if not GlobalVar.disablePipeline:
             GlobalVar.name_to_func["Functional#reduce_by_key_end_py"] = ReduceByKey.load_n2n
         else:
             GlobalVar.name_to_func["Functional#reduce_by_key_end_py"] = ReduceByKey.load_disablepipeline
         GlobalVar.name_to_prefunc["Functional#reduce_by_key_end_py"] = ReduceByKey.end_prefunc
         GlobalVar.name_to_type["Functional#reduce_by_key_end_py"] = GlobalVar.loadtype
     @staticmethod
-    def func(op, data):
+    def func(_, data):
         for x in data:
-            assert (type(x) is tuple or type(x) is list) and len(x) is 2
+            assert (isinstance(x, tuple) or isinstance(x, list)) and len(x) is 2
             # GlobalVar.reduce_by_key_store.append((Serializer.return dumps(x[0]), Serializer.dumps(x[1])))
             GlobalVar.reduce_by_key_store.append((x[0], x[1]))
         # import sys
@@ -300,15 +298,15 @@ class ReduceByKey:
         GlobalSocket.pipe_to_cpp.send(GlobalVar.reduce_by_key_list)
 
         # combine
-        GlobalVar.reduce_by_key_store.sort(key=lambda x:x[0])
+        GlobalVar.reduce_by_key_store.sort(key=lambda x: x[0])
         send_buffer = []
         if GlobalVar.reduce_by_key_store:
             prev_x, prev_y = GlobalVar.reduce_by_key_store[0]
-            for x,y in islice(GlobalVar.reduce_by_key_store, 1, None):
+            for x, y in islice(GlobalVar.reduce_by_key_store, 1, None):
                 if x != prev_x:
                     send_buffer.append(Serializer.dumps(prev_x))
                     send_buffer.append(Serializer.dumps(prev_y))
-                    prev_x, prev_y = x,y
+                    prev_x, prev_y = x, y
                 else:
                     prev_y = op.func(prev_y, y)
             send_buffer.append(Serializer.dumps(prev_x))
@@ -322,7 +320,7 @@ class ReduceByKey:
     def func_hashmap(op, data):
         store = GlobalVar.reduce_by_key_store
         for x in data:
-            assert (type(x) is tuple or type(x) is list) and len(x) is 2
+            assert (isinstance(x, tuple) or isinstance(x, list)) and len(x) is 2
             if store.has_key(x[0]):
                 store[x[0]] = op.func(x[1], store[x[0]])
             else:
@@ -336,16 +334,17 @@ class ReduceByKey:
 
 
     @staticmethod
-    def postfunc_combine_n2n(op):
+    def postfunc_combine_n2n(_):
+        """ Attempt4: Hash Map """
+
         # send out reduce_by_key_store
         GlobalSocket.pipe_to_cpp.send("Functional#reduce_by_key")
         GlobalSocket.pipe_to_cpp.send(GlobalVar.reduce_by_key_list)
 
-        """ Attempt4: Hash Map """
         GlobalSocket.pipe_to_cpp.send("0")
         send_buffer = [[] for i in xrange(GlobalVar.num_workers)]
         if GlobalVar.reduce_by_key_store:
-            for x,y in GlobalVar.reduce_by_key_store.items():
+            for x, y in GlobalVar.reduce_by_key_store.items():
                 dst = hash(x) % GlobalVar.num_workers
                 send_buffer[dst].append((x, y))
         for i in xrange(GlobalVar.num_workers):
@@ -353,19 +352,20 @@ class ReduceByKey:
 
     @staticmethod
     def load_n2n(op):
+        """ Attempt 1: init """
+
         GlobalSocket.pipe_to_cpp.send("Functional#reduce_by_key_end")
         GlobalSocket.pipe_to_cpp.send(op.op_param[OperationParam.list_str])
 
         store = Serializer.loads(GlobalN2NSocket.recv())
-        for i in xrange(1, GlobalVar.num_workers):
+        for _ in xrange(1, GlobalVar.num_workers):
             store.extend(Serializer.loads(GlobalN2NSocket.recv()))
 
-        """ Attempt 1: init """
         func = op.func
-        store.sort(key=lambda x:x[0])
+        store.sort(key=lambda x: x[0])
         if store:
             prev_x, prev_y = store[0]
-            for x,y in islice(store, 1, None):
+            for x, y in islice(store, 1, None):
                 if x != prev_x:
                     # buff.append((prev_x, prev_y))
                     yield [(prev_x, prev_y)]
@@ -385,11 +385,10 @@ class ReduceByKey:
 
         # combine
         send_buffer = []
-        # reduce_func = lambda x,y: x[0], op.func(x[1],y[1])
-        def reduce_func(x,y):
+        def reduce_func(x, y):
             return x[0], op.func(x[1], y[1])
-        for _,y in groupby(sorted(GlobalVar.reduce_by_key_store), key=lambda x:x[0]):
-            k,v = reduce(reduce_func, y)
+        for _, y in groupby(sorted(GlobalVar.reduce_by_key_store), key=lambda x: x[0]):
+            k, v = reduce(reduce_func, y)
             send_buffer.append(Serializer.dumps(k))
             send_buffer.append(Serializer.dumps(v))
         GlobalSocket.pipe_to_cpp.send(str(len(send_buffer)/2))
@@ -403,30 +402,25 @@ class ReduceByKey:
         GlobalSocket.pipe_to_cpp.send(GlobalVar.reduce_by_key_list)
 
         send_buffer = dict()
-        for x,y in GlobalVar.reduce_by_key_store:
+        for x, y in GlobalVar.reduce_by_key_store:
             if x in send_buffer:
                 send_buffer[x] = op.func(send_buffer[x], y)
             else:
                 send_buffer[x] = y
         GlobalSocket.pipe_to_cpp.send(str(len(send_buffer)))
-        for x,y in send_buffer.iteritems():
+        for x, y in send_buffer.iteritems():
             GlobalSocket.pipe_to_cpp.send(Serializer.dumps(x))
             GlobalSocket.pipe_to_cpp.send(Serializer.dumps(y))
 
     @staticmethod
-    def postfunc_no_combine(op):
+    def postfunc_no_combine(_):
         GlobalSocket.pipe_to_cpp.send("Functional#reduce_by_key")
         GlobalSocket.pipe_to_cpp.send(GlobalVar.reduce_by_key_list)
         GlobalSocket.pipe_to_cpp.send(str(len(GlobalVar.reduce_by_key_store)))
-        for (x,y) in GlobalVar.reduce_by_key_store:
+        for (x, y) in GlobalVar.reduce_by_key_store:
             GlobalSocket.pipe_to_cpp.send(Serializer.dumps(x))
             GlobalSocket.pipe_to_cpp.send(Serializer.dumps(y))
         GlobalVar.reduce_by_key_store = []
-
-        # GlobalSocket.pipe_to_cpp.send("reduce_by_key")
-        # GlobalSocket.pipe_to_cpp.send(GlobalVar.reduce_by_key_list)
-        # GlobalSocket.pipe_to_cpp.send(GlobalVar.reduce_by_key_store.data_buf)
-        # GlobalVar.reduce_by_key_store = None
 
     @staticmethod
     def end_prefunc(op):
@@ -436,17 +430,16 @@ class ReduceByKey:
         GlobalSocket.pipe_to_cpp.send("Functional#reduce_by_key_end")
         GlobalSocket.pipe_to_cpp.send(op.op_param[OperationParam.list_str])
         func = op.func
-        while(True):
+        while True:
             key = GlobalSocket.pipe_from_cpp.recv()
             if not key:
                 break
             key = Serializer.loads(key)
             num = int(GlobalSocket.pipe_from_cpp.recv())
             res = None
-            for i in xrange(num):
+            for _ in xrange(num):
                 recv = Serializer.loads(GlobalSocket.pipe_from_cpp.recv())
                 res = recv if res is None else func(res, recv)
-            # print "reduce_by_key res: ", key, res
 
             yield [(key, res)]
 
@@ -456,21 +449,20 @@ class ReduceByKey:
         GlobalSocket.pipe_to_cpp.send(op.op_param[OperationParam.list_str])
         func = op.func
         ret = []
-        while(True):
+        while True:
             key = GlobalSocket.pipe_from_cpp.recv()
             if not key:
                 break
             key = Serializer.loads(key)
             num = int(GlobalSocket.pipe_from_cpp.recv())
             res = None
-            for i in xrange(num):
+            for _ in xrange(num):
                 recv = Serializer.loads(GlobalSocket.pipe_from_cpp.recv())
                 res = recv if res is None else func(res, recv)
-            # print "reduce_by_key res: ", key, res
             ret.append((key, res))
         yield ret
 
-class GroupByKey:
+class GroupByKey(object):
     @staticmethod
     def register():
         GlobalVar.name_to_func["Functional#group_by_key_py"] = GroupByKey.func
@@ -481,21 +473,21 @@ class GroupByKey:
         GlobalVar.name_to_func["Functional#group_by_key_end_py"] = GroupByKey.load
         GlobalVar.name_to_type["Functional#group_by_key_end_py"] = GlobalVar.loadtype
     @staticmethod
-    def func(op, data):
+    def func(_, data):
         for x in data:
-            assert (type(x) is tuple or type(x) is list) and len(x) is 2
+            assert (isinstance(x, tuple) or isinstance(x, list)) and len(x) is 2
             GlobalVar.group_by_key_store.append((Serializer.dumps(x[0]), Serializer.dumps(x[1])))
     @staticmethod
     def prefunc(op):
         GlobalVar.group_by_key_store = []
         GlobalVar.group_by_key_list = op.op_param[OperationParam.list_str]
     @staticmethod
-    def postfunc(op):
+    def postfunc(_):
         # send out group_by_key_store
         GlobalSocket.pipe_to_cpp.send("Functional#group_by_key")
         GlobalSocket.pipe_to_cpp.send(GlobalVar.group_by_key_list)
         GlobalSocket.pipe_to_cpp.send(str(len(GlobalVar.group_by_key_store)))
-        for (x,y) in GlobalVar.group_by_key_store:
+        for (x, y) in GlobalVar.group_by_key_store:
             GlobalSocket.pipe_to_cpp.send(x)
             GlobalSocket.pipe_to_cpp.send(y)
         GlobalVar.group_by_key_store = []
@@ -504,20 +496,19 @@ class GroupByKey:
     def load(op):
         GlobalSocket.pipe_to_cpp.send("Functional#group_by_key_end")
         GlobalSocket.pipe_to_cpp.send(op.op_param[OperationParam.list_str])
-        while(True):
+        while True:
             key = GlobalSocket.pipe_from_cpp.recv()
             if not key:
                 break
             key = Serializer.loads(key)
             num = int(GlobalSocket.pipe_from_cpp.recv())
             res = []
-            for i in xrange(num):
+            for _ in xrange(num):
                 recv = Serializer.loads(GlobalSocket.pipe_from_cpp.recv())
                 res.append(recv)
-            # print "group_by_key res: ", key, res
             yield [(key, res)]
 
-class Distinct:
+class Distinct(object):
     @staticmethod
     def register():
         GlobalVar.name_to_func["Functional#distinct_py"] = Distinct.func
@@ -527,13 +518,16 @@ class Distinct:
 
         GlobalVar.name_to_func["Functional#distinct_end_py"] = Distinct.load
         GlobalVar.name_to_type["Functional#distinct_end_py"] = GlobalVar.loadtype
+
     @staticmethod
-    def func(op, data):
+    def func(_, data):
         for x in data:
             GlobalVar.distinct_store.append(Serializer.dumps(x))
+
     @staticmethod
-    def prefunc(op):
+    def prefunc(_):
         GlobalVar.distinct_store = []
+
     @staticmethod
     def postfunc(op):
         # send out distinct_store
@@ -548,14 +542,14 @@ class Distinct:
     def load(op):
         GlobalSocket.pipe_to_cpp.send("Functional#distinct_end")
         GlobalSocket.pipe_to_cpp.send(op.op_param[OperationParam.list_str])
-        while(True):
+        while True:
             value = GlobalSocket.pipe_from_cpp.recv()
             if not value:
                 break
             value = Serializer.loads(value)
             yield [value]
 
-class Difference:
+class Difference(object):
     @staticmethod
     def register():
         GlobalVar.name_to_func["Functional#difference_py"] = Difference.func
@@ -567,12 +561,14 @@ class Difference:
         GlobalVar.name_to_type["Functional#difference_end_py"] = GlobalVar.loadtype
 
     @staticmethod
-    def prefunc(op):
+    def prefunc(_):
         GlobalVar.difference_store = []
+
     @staticmethod
-    def func(op, data):
+    def func(_, data):
         for x in data:
             GlobalVar.difference_store.append(Serializer.dumps(x))
+
     @staticmethod
     def postfunc(op):
         # send out difference_store
@@ -588,15 +584,15 @@ class Difference:
     def load(op):
         GlobalSocket.pipe_to_cpp.send("Functional#difference_end")
         GlobalSocket.pipe_to_cpp.send(op.op_param[OperationParam.list_str])
-        while(True):
+        while True:
             value = GlobalSocket.pipe_from_cpp.recv()
             if not value:
                 break
             value = Serializer.loads(value)
-            cnt = int(GlobalSocket.pipe_from_cpp.recv())
+            _ = int(GlobalSocket.pipe_from_cpp.recv())
             yield [value]
 
-class Parallelize:
+class Parallelize(object):
     @staticmethod
     def register():
         GlobalVar.name_to_func["Functional#parallelize_py"] = Parallelize.load
@@ -610,7 +606,7 @@ class Parallelize:
             yield [data[i]]
             i += GlobalVar.num_workers
 
-class WriteToHdfs:
+class WriteToHdfs(object):
     @staticmethod
     def register():
         GlobalVar.name_to_func["Functional#write_to_hdfs_py"] = WriteToHdfs.func
@@ -618,7 +614,7 @@ class WriteToHdfs:
         GlobalVar.name_to_postfunc["Functional#write_to_hdfs_py"] = WriteToHdfs.postfunc
         GlobalVar.name_to_type["Functional#write_to_hdfs_py"] = GlobalVar.actiontype
     @staticmethod
-    def func(op, data):
+    def func(_, data):
         for x in data:
             # GlobalVar.write_to_hdfs_store.append(repr(x)+"\n")  # May use this when writing repr data
             GlobalVar.write_to_hdfs_store.append(str(x)+"\n")
@@ -628,7 +624,7 @@ class WriteToHdfs:
         GlobalVar.write_to_hdfs_list = op.op_param[OperationParam.list_str]
         GlobalVar.write_to_hdfs_url = op.op_param[OperationParam.url_str]
     @staticmethod
-    def postfunc(op):
+    def postfunc(_):
         GlobalSocket.pipe_to_cpp.send("Functional#write_to_hdfs")
         GlobalSocket.pipe_to_cpp.send(GlobalVar.write_to_hdfs_list)
         GlobalSocket.pipe_to_cpp.send(GlobalVar.write_to_hdfs_url)
@@ -637,7 +633,7 @@ class WriteToHdfs:
             GlobalSocket.pipe_to_cpp.send(x)
         GlobalVar.write_to_hdfs_store = []
 
-class ForEach():
+class ForEach(object):
     @staticmethod
     def register():
         GlobalVar.name_to_func["Functional#foreach_py"] = ForEach.func
@@ -651,10 +647,7 @@ class ForEach():
     def prefunc(op):
         op.func = cloudpickle.loads(op.op_param[OperationParam.lambda_str]) # store lambda
 
-"""Transformations:
-    Map, Filter, FlatMap
-"""
-class Map:
+class Map(object):
     @staticmethod
     def register():
         GlobalVar.name_to_func["Functional#map_py"] = Map.func
@@ -668,7 +661,7 @@ class Map:
     def prefunc(op):
         op.func = cloudpickle.loads(op.op_param[OperationParam.lambda_str]) # store lambda
 
-class Filter:
+class Filter(object):
     @staticmethod
     def register():
         GlobalVar.name_to_func["Functional#filter_py"] = Filter.func
@@ -682,7 +675,7 @@ class Filter:
     def prefunc(op):
         op.func = cloudpickle.loads(op.op_param[OperationParam.lambda_str]) # store lambda
 
-class FlatMap:
+class FlatMap(object):
     @staticmethod
     def register():
         GlobalVar.name_to_func["Functional#flat_map_py"] = FlatMap.func

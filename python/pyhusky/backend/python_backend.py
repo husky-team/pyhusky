@@ -17,7 +17,7 @@ import sys
 from pyhusky.backend.globalvar import GlobalSocket, GlobalVar, GlobalN2NSocket
 from pyhusky.backend.processor import handle_instr
 from pyhusky.backend.register import register_func
-from pyhusky.common.serializers import Serializer, MarshalSerializer, PickleSerializer, AutoSerializer, CompressedSerializer
+from pyhusky.common.serializers import Serializer, PickleSerializer
 
 def log_msg(msg):
     print msg
@@ -31,11 +31,8 @@ if __name__ == "__main__":
     GlobalVar.num_workers = int(sys.argv[4])
     GlobalVar.session_id = int(sys.argv[5])
 
-    # disablePipeline ?
-    # GlobalVar.disablePipeline = True
     GlobalVar.disablePipeline = False
 
-    # Set serializer {MarshalSerializer(), PickleSerializer(), AutoSerializer(), CompressedSerializer(PickleSerializer())}
     Serializer.serializer = PickleSerializer()
 
     GlobalSocket.init_socket(str(GlobalVar.local_id), str(GlobalVar.proc_id), str(GlobalVar.session_id))
@@ -43,10 +40,7 @@ if __name__ == "__main__":
 
     # N2N
     GlobalN2NSocket.init_socket()
-    # N2N
-    instr_id = 0
     while True:
-        exit = handle_instr(instr_id)
-        instr_id += 1
-        if exit:
+        to_exit = handle_instr()
+        if to_exit:
             break

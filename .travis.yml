@@ -2,7 +2,7 @@ sudo: required
 
 dist: trusty
 
-language: python  # workaround for not setting CC/CXX with default value
+language: python
 
 addons:
   apt:
@@ -26,6 +26,7 @@ before_install:
   - sudo apt-get -y install libboost-{chrono,program-options,date-time,thread,system,filesystem,regex,serialization}1.58{-dev,.0}
 
 install:
+  # For c++ dependencies
   - mkdir tmp
   - cd tmp
   - git clone https://github.com/zeromq/cppzmq
@@ -35,11 +36,18 @@ install:
   - cd ../..
   - rm -rf tmp
 
+  # For python dependencies
+  - pip install pylint
+  - pip install zmq
+  - pip install cloudpickle
+  - pip install msgpack-python
+
 before_script:
   - export PYHUSKY_ROOT=.
   - export CLANG_FORMAT=clang-format-3.8
   - ./scripts/lint.py
   - ./scripts/clang-format.py -o check
+  - ./scripts/pylint.py
 
 matrix:
   include:

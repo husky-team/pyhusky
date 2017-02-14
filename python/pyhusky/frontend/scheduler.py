@@ -12,30 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import cPickle
 import random
-import struct
 import time
-import zmq
 
 from pyhusky.common.binstream import BinStream
 from pyhusky.common.operation import Operation
 from pyhusky.frontend import communication
 from pyhusky.frontend import config
-from pyhusky.frontend import session
 from pyhusky.frontend.datareceiver import data_receiver
 
-"""
-structure of binstream
-[node id][op][dep_id1, dep_id2, ...][node id][op][dep_id1, dep_id2, ...]
-"""
 id_counter = 0
 
-
 def visit_deps(op, bs):
+    """
+    structure of binstream
+    [node id][op][dep_id1, dep_id2, ...][node id][op][dep_id1, dep_id2, ...]
+    """
+
     global id_counter
     id_counter += 1
-    id = id_counter
+    bid = id_counter
 
     self_dep_list = []
     for dep in op.op_deps:
@@ -44,11 +40,11 @@ def visit_deps(op, bs):
         dep_id = visit_deps(dep, bs)
         self_dep_list.append(dep_id)
 
-    bs << id
+    bs << bid
     bs << op
     bs << self_dep_list
     config.log_msg(op)
-    return id
+    return bid
 
 
 def serialize_dag(pending_op):
@@ -81,7 +77,7 @@ def submit_task(bin_dag, op):
             if prgs == 100:
                 break
         elif status == "data":
-            ret = data_receiver(reply,  op)
+            ret = data_receiver(reply, op)
             if ret is not None:
                 if result is None:
                     result = ret

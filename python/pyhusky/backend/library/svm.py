@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import cPickle
-import json
-
 from pyhusky.backend.globalvar import GlobalVar, GlobalSocket, OperationParam
 
 def register_all():
     SVMModel.register()
 
-class SVMModel:
+class SVMModel(object):
+    def __init__(self):
+        pass
+
     @staticmethod
     def register():
         GlobalVar.name_to_prefunc["SVMModel#SVM_load_pyhlist_py"] = SVMModel.load_pyhlist_prefunc
@@ -36,15 +36,17 @@ class SVMModel:
     def load_pyhlist_prefunc(op):
         GlobalVar.xy_line_list = op.op_param[OperationParam.list_str]
         GlobalVar.xy_line_store = []
+
     @staticmethod
-    def load_pyhlist_func(op, data):
+    def load_pyhlist_func(_, data):
         for I in data:
-            assert type(I) is tuple and len(I) is 2
-            X, y = I
+            assert isinstance(I, tuple) and len(I) is 2
+            X, _ = I
             assert hasattr(X, '__iter__')
             GlobalVar.xy_line_store.append(I)
+
     @staticmethod
-    def load_pyhlist_end_postfunc(op):
+    def load_pyhlist_end_postfunc(_):
         GlobalSocket.pipe_to_cpp.send("SVMModel#SVM_load_pyhlist_py")
         GlobalSocket.pipe_to_cpp.send(GlobalVar.xy_line_list)
         # send out the len of datatset

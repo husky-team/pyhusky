@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pyhusky.common.binstream import BinStream
 from pyhusky.common.serializers import Serializer
 from pyhusky.frontend.library.register import register
 
-class Receiver:
+class Receiver(object):
     receiver_map = dict()
     @staticmethod
     def register():
@@ -29,7 +28,9 @@ class Receiver:
 
 def data_receiver(reply, op):
     flag = reply.load_int32()
-    if flag == 0: # from python
+    if flag == 0:
+        # from python
         return Receiver.pythonbackend_receiver(reply)
-    else: # from c++
+    else:
+        # from c++
         return Receiver.receiver_map[op.op_name](reply)

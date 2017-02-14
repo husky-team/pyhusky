@@ -12,16 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import cPickle
-import json
-import sys
-
 from pyhusky.backend.globalvar import GlobalVar, GlobalSocket, OperationParam
 
 def register_all():
     LinearModel.register()
 
-class LinearModel:
+class LinearModel(object):
+    def __init__(self):
+        pass
+
     @staticmethod
     def register():
         GlobalVar.name_to_prefunc["LinearRegressionModel#LinearR_load_pyhlist_py"] = LinearModel.load_pyhlist_prefunc
@@ -38,15 +37,17 @@ class LinearModel:
         GlobalVar.xy_line_list = op.op_param[OperationParam.list_str]
         GlobalVar.is_sparse = op.op_param["is_sparse"]
         GlobalVar.xy_line_store = []
+
     @staticmethod
-    def load_pyhlist_func(op, data):
+    def load_pyhlist_func(_, data):
         for I in data:
-            assert type(I) is tuple and len(I) is 2
-            X, y = I
+            assert isinstance(I, tuple) and len(I) is 2
+            X, _ = I
             assert hasattr(X, '__iter__')
             GlobalVar.xy_line_store.append(I)
+
     @staticmethod
-    def load_pyhlist_end_postfunc(op):
+    def load_pyhlist_end_postfunc(_):
         GlobalSocket.pipe_to_cpp.send("LinearRegressionModel#LinearR_load_pyhlist_py")
         GlobalSocket.pipe_to_cpp.send(GlobalVar.xy_line_list)
         GlobalSocket.pipe_to_cpp.send(GlobalVar.is_sparse)

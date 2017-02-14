@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import cPickle
-import cloudpickle
-import json
-import struct
 import sys
 
 from pyhusky.backend.globalvar import GlobalVar, GlobalSocket
@@ -58,7 +54,7 @@ def visit(op, data):
 def finish_instr():
     GlobalSocket.pipe_to_cpp.send("instr_end")
 
-def handle_instr(instr_id):
+def handle_instr():
     instr = GlobalSocket.pipe_from_cpp.recv()
     if instr == "session_end_py":
         return True
@@ -66,13 +62,13 @@ def handle_instr(instr_id):
         bin_dag = BinStream()
         bin_dag.data_buf = GlobalSocket.pipe_from_cpp.recv()
         root = bin_dag.load_dag()
-        
         log_msg("The root of this instrution is: "+ root.op_name)
         preprocess_instr(root)
         map_partitions = get_map_partition(root)
-        if root.op_name in ["Functional#load_py", "Functional#load_cache_py", \
-                "Functional#reduce_by_key_end_py", "Functional#group_by_key_end_py", "Functional#distinct_end_py", \
-                "Functional#parallelize_py", "Functional#difference_end_py"] :
+        if root.op_name in ["Functional#load_py", "Functional#load_cache_py",
+                            "Functional#reduce_by_key_end_py", "Functional#group_by_key_end_py",
+                            "Functional#distinct_end_py", "Functional#parallelize_py",
+                            "Functional#difference_end_py"]:
             load_generator = GlobalVar.name_to_func[root.op_name](root)
             for chunk in load_generator:
                 for dep in root.op_deps:

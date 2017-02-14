@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class GDReceiver:
+class GDReceiver(object):
+    def __init__(self):
+        pass
+
     @staticmethod
     def register(receiver_map):
         receiver_map["LinearRegressionModel#LinearR_train_py"] = GDReceiver.train_receiver
@@ -23,7 +26,7 @@ class GDReceiver:
         # eat dummy int64 represents the string length
         dummy = reply.load_int64()
         n_params = reply.load_int32()
-        for i in xrange(n_params):
+        for _ in xrange(n_params):
             param_v = reply.load_double()
             res.append(param_v)
         return res
