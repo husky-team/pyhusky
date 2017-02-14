@@ -15,7 +15,7 @@
 import cPickle
 
 from pyhusky.common.operation import Operation, OperationParam
-from pyhusky.common.serializers import Serializer, MarshalSerializer, PickleSerializer, AutoSerializer, CompressedSerializer
+from pyhusky.common.serializers import Serializer, PickleSerializer
 from pyhusky.frontend import config
 from pyhusky.frontend import session
 from pyhusky.frontend.datareceiver import Receiver
@@ -69,7 +69,7 @@ def mongodb(host=None, port=None):
 
 
 def parallelize(data):
-    if type(data) is list:
+    if isinstance(data, list):
         hlist = PyHuskyList()
         pdata = cPickle.dumps(data)
         param = {OperationParam.data_str: pdata,

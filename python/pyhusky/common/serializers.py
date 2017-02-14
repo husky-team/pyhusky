@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import cPickle
-import marshal
-import msgpack
 import sys
 import zlib
+
+import marshal
+import msgpack
 
 if sys.version < '3':
     import cPickle as pickle
@@ -25,7 +25,9 @@ else:
     import pickle
     protocol = 3
 
-class MsgpackSerializer():
+class MsgpackSerializer(object):
+    def __init__(self):
+        pass
 
     def dumps(self, obj):
         return msgpack.packb(obj)
@@ -33,7 +35,9 @@ class MsgpackSerializer():
     def loads(self, obj):
         return msgpack.unpackb(obj)
 
-class MarshalSerializer():
+class MarshalSerializer(object):
+    def __init__(self):
+        pass
 
     def dumps(self, obj):
         return marshal.dumps(obj)
@@ -41,7 +45,9 @@ class MarshalSerializer():
     def loads(self, obj):
         return marshal.loads(obj)
 
-class PickleSerializer():
+class PickleSerializer(object):
+    def __init__(self):
+        pass
 
     def dumps(self, obj):
         return pickle.dumps(obj, protocol)
@@ -50,10 +56,10 @@ class PickleSerializer():
         def loads(self, obj, encoding="bytes"):
             return pickle.loads(obj, encoding=encoding)
     else:
-        def loads(self, obj, encoding=None):
+        def loads(self, obj):
             return pickle.loads(obj)
 
-class AutoSerializer():
+class AutoSerializer(object):
     """
     Choose marshal or pickle as serialization protocol automatically
     """
@@ -65,7 +71,7 @@ class AutoSerializer():
             return b'P' + pickle.dumps(obj, -1)
         try:
             return b'M' + marshal.dumps(obj)
-        except Exception:
+        except ValueError:
             self._type = b'P'
             return b'P' + pickle.dumps(obj, -1)
 
@@ -76,9 +82,9 @@ class AutoSerializer():
         elif _type == b'P':
             return pickle.loads(obj[1:])
         else:
-            raise ValueError("invalid sevialization type: %s" % _type)
+            raise ValueError("Invalid sevialization type: %s" % _type)
 
-class CompressedSerializer():
+class CompressedSerializer(object):
     """
     Compress the serialized data
     """
@@ -91,10 +97,10 @@ class CompressedSerializer():
     def loads(self, obj):
         return self.serializer.loads(zlib.decompress(obj))
 
-class Serializer:
-    serializer = PickleSerializer()
-    # serializer = MarshalSerializer()
-    # serializer = MsgpackSerializer()
+class Serializer(object):
+    def __init__(self):
+        self.serializer = PickleSerializer()
+
     @staticmethod
     def dumps(obj):
         return Serializer.serializer.dumps(obj)

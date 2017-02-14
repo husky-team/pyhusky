@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import cloudpickle
 import struct
 import types
+
+import cloudpickle
 
 from pyhusky.common.operation import Operation
 
@@ -41,7 +42,7 @@ class BinStream(object):
                 self << elem
         elif isinstance(obj, types.DictType):
             self << long(len(obj))
-            for k,v in obj.iteritems():
+            for k, v in obj.iteritems():
                 self << k
                 self << v
         elif isinstance(obj, Operation):
@@ -57,7 +58,7 @@ class BinStream(object):
         val = struct.unpack('=Q', self.data_buf[self.front:self.front+8])[0]
         self.front += 8
         return val
-    
+
     def load_float(self):
         val = struct.unpack('=f', self.data_buf[self.front:self.front+4])[0]
         self.front += 4
@@ -78,17 +79,17 @@ class BinStream(object):
         func_str = self.load_str()
         return cloudpickle.loads(func_str)
 
-    """
-    Load an operation without its dependencies
-    """
     def load_op(self):
+        """
+        Load an operation without its dependencies
+        """
         op_name = self.load_str()
         param_sz = self.load_int64()
         op_param = dict()
-        for i in xrange(param_sz):
-            # op_param.append(self.load_str())
+        for _ in xrange(param_sz):
             k, v = self.load_str(), self.load_str()
             op_param[k] = v
+
         op = Operation(op_name, op_param)
         return op
 
@@ -96,16 +97,17 @@ class BinStream(object):
         op_dict = dict()
         deps = set()
         while self.size() != 0:
-            id = self.load_int32()
-            op_dict[id] = self.load_op()
+            op_id = self.load_int32()
+            op_dict[op_id] = self.load_op()
             deps_sz = self.load_int64()
-            for i in xrange(deps_sz):
+            for _ in xrange(deps_sz):
                 dep_id = self.load_int32()
-                op_dict[id].op_deps.append(op_dict[dep_id])
+                op_dict[op_id].op_deps.append(op_dict[dep_id])
                 deps.add(dep_id)
-        for id in op_dict:
-            if id not in deps:
-                return op_dict[id]
+
+        for op_id in op_dict:
+            if op_id not in deps:
+                return op_dict[op_id]
 
     def size(self):
         return len(self.data_buf) - self.front

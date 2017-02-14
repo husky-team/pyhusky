@@ -24,24 +24,20 @@ NEW_TASK = 0x30fa1258
 QUERY_TASK = 0x40fa1257
 
 def init(identity, master_addr):
-    global socket
     socket.setsockopt(zmq.IDENTITY, identity)
     socket.connect(master_addr)
 
-def send(type, content=None):
-    global socket
+def send(msg_type, content=None):
     socket.send('', zmq.SNDMORE)
     if content != None:
-        socket.send(struct.pack('=i', type), zmq.SNDMORE)
+        socket.send(struct.pack('=i', msg_type), zmq.SNDMORE)
         socket.send(content)
     else:
-        socket.send(struct.pack('=i', type))
+        socket.send(struct.pack('=i', msg_type))
 
-def ask(type, content=''):
-
-    global socket
+def ask(msg_type, content=''):
     socket.send('', zmq.SNDMORE)
-    socket.send(struct.pack('=i', type), zmq.SNDMORE)
+    socket.send(struct.pack('=i', msg_type), zmq.SNDMORE)
     socket.send(content)
 
     socket.recv()

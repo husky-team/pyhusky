@@ -12,16 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
 import zmq
 
-class OperationParam:
+class OperationParam(object):
     data_str = "data"
     url_str = "url"
     lambda_str = "lambda"
     list_str = "list_name"
 
-class GlobalVar:
+    def __init__(self):
+        pass
+
+class GlobalVar(object):
     actiontype = "action"
     transformationtype = "transformation"
     loadtype = "load"
@@ -32,7 +34,13 @@ class GlobalVar:
     name_to_prefunc = dict()
     name_to_postfunc = dict()
 
-class GlobalSocket:
+    def __init__(self):
+        pass
+
+class GlobalSocket(object):
+    def __init__(self):
+        pass
+
     # pipe_from_cpp
     # pipe_to_cpp
     @staticmethod
@@ -51,10 +59,7 @@ class GlobalSocket:
     def recv():
         return GlobalSocket.pipe_from_cpp.recv()
 
-# N2N
-import threading
-
-class GlobalN2NSocket:
+class GlobalN2NSocket(object):
     @staticmethod
     def init_socket():
         ctx = zmq.Context()
@@ -62,7 +67,7 @@ class GlobalN2NSocket:
         GlobalN2NSocket.puller = ctx.socket(zmq.PULL)
         GlobalN2NSocket.puller.bind("tcp://0.0.0.0:" + str(comm_port + GlobalVar.local_id))
         GlobalN2NSocket.pushers = []
-        for i in xrange(int(GlobalSocket.recv())):
+        for _ in xrange(int(GlobalSocket.recv())):
             host = "tcp://" + GlobalSocket.recv() + ":"
             for j in xrange(int(GlobalSocket.recv())):
                 sock = ctx.socket(zmq.PUSH)
@@ -76,5 +81,3 @@ class GlobalN2NSocket:
     @staticmethod
     def recv():
         return GlobalN2NSocket.puller.recv()
-
-# N2N

@@ -14,11 +14,9 @@
 
 import random
 import string
-import types
 
-from pyhusky.common.operation import Operation, OperationParam 
+from pyhusky.common.operation import Operation, OperationParam
 from pyhusky.frontend import config
-from pyhusky.frontend import session
 from pyhusky.frontend.scheduler import compute, compute_collect
 
 def gen_list_name():
@@ -28,9 +26,9 @@ def gen_list_name():
 class HuskyList(object):
     def __init__(self):
         self.pending_op = None
-        try: 
+        try:
             self.list_name = config.conf.session_id + gen_list_name()
-        except:
+        except IndexError:
             print "Error: Cannot initialize HuskyList; maybe you forgot to use pyhusky_start()"
             exit()
 
@@ -78,7 +76,7 @@ class PyHuskyList(HuskyList):
             return NotImplemented
 
     def concat(self, other_list):
-        if isinstance(other_list, PyHuskyList) or isinstance(other_list, HuskyListStr):
+        if isinstance(other_list, PyHuskyList):
             phlist = PyHuskyList()
             param = {OperationParam.list_str : phlist.list_name}
             phlist.pending_op = Operation("Functional#concat_py", param, [self.pending_op, other_list.pending_op])
@@ -120,9 +118,9 @@ class PyHuskyList(HuskyList):
         phlist.pending_op = Operation("Functional#group_by_key_py", param, [self.pending_op])
         return phlist
 
-    def write_to_hdfs(self, url): 
-        param = {OperationParam.url_str : url, 
-                 OperationParam.list_str : self.list_name }
+    def write_to_hdfs(self, url):
+        param = {OperationParam.url_str : url,
+                 OperationParam.list_str : self.list_name}
         op = Operation("Functional#write_to_hdfs_py", param, [self.pending_op])
         compute(op)
         return None
@@ -164,9 +162,9 @@ class PyHuskyList(HuskyList):
         else:
             return NotImplemented
 
-    def topk(self, k, key=lambda x:x, reverse=False):
-        return self.map_partition(lambda a:sorted(a, None, key, reverse)[:k]).reduce(lambda a,b:sorted(a+b, None, key, reverse)[:k])
-    
+    def topk(self, k, key=lambda x: x, reverse=False):
+        return self.map_partition(lambda a: sorted(a, None, key, reverse)[:k]).reduce(lambda a, b: sorted(a+b, None, key, reverse)[:k])
+
     def empty(self):
         return True if self.count() == 0 else False
 
@@ -174,7 +172,7 @@ class PyHuskyList(HuskyList):
         print self.collect()
 
     def count_by_key(self):
-        return self.map(lambda (k,v):(k,1)).reduce_by_key(lambda x,y:x+y)
+        return self.map(lambda (k, v): (k, 1)).reduce_by_key(lambda x, y: x+y)
 
     def foreach(self, func):
         if hasattr(func, '__call__'):
@@ -188,7 +186,7 @@ class PyHuskyList(HuskyList):
 
 class HDFS(PyHuskyList):
     def __init__(self, host=None, port=None):
-        super(PyHuskyList, self).__init__()
+        super(HDFS, self).__init__()
         assert host is not None and port is not None
         self.host = host
         self.port = port
@@ -196,8 +194,8 @@ class HDFS(PyHuskyList):
     def load(self, path=None):
         assert path is not None
         param = {
-            "Protocol": "hdfs", 
-            "Host": self.host, 
+            "Protocol": "hdfs",
+            "Host": self.host,
             "Port": self.port,
             "Path": path,
             OperationParam.list_str : self.list_name
@@ -207,7 +205,7 @@ class HDFS(PyHuskyList):
 
 class MongoDB(PyHuskyList):
     def __init__(self, host=None, port=None):
-        super(PyHuskyList, self).__init__()
+        super(MongoDB, self).__init__()
         assert host is not None and port is not None
         self.host = host
         self.port = port
@@ -223,7 +221,7 @@ class MongoDB(PyHuskyList):
     def load(self, database=None, collection=None):
         assert database is not None and collection is not None
         param = {
-            "Protocol": "mongodb", 
+            "Protocol": "mongodb",
             "Server": '{}:{}'.format(self.host, self.port),
             "Database": database,
             "Collection": collection,
