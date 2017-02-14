@@ -19,10 +19,10 @@ add_library(pyhusky-backend-objs OBJECT
     operation.cpp
     opdag.cpp
     register.cpp
-    pythonconnector.cpp
-    threadconnector.cpp
-    daemondriver.cpp
-    workerdriver.cpp
+    python_connector.cpp
+    thread_connector.cpp
+    daemon_driver.cpp
+    worker_driver.cpp
 )
 set_property(TARGET pyhusky-backend-objs PROPERTY CXX_STANDARD 14)
 

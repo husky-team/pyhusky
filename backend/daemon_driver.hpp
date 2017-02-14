@@ -24,7 +24,7 @@
 #include "husky/base/serialization.hpp"
 #include "husky/core/mailbox.hpp"
 
-#include "backend/threadconnector.hpp"
+#include "backend/thread_connector.hpp"
 
 namespace husky {
 

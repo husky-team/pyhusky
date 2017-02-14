@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/workerdriver.hpp"
+#include "backend/worker_driver.hpp"
 
 #include <string>
 
@@ -29,9 +29,9 @@
 
 #include "backend/opdag.hpp"
 #include "backend/operation.hpp"
-#include "backend/pythonconnector.hpp"
+#include "backend/python_connector.hpp"
 #include "backend/register.hpp"
-#include "backend/threadconnector.hpp"
+#include "backend/thread_connector.hpp"
 
 namespace husky {
 

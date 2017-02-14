@@ -30,9 +30,9 @@
 
 #include "backend/itc.hpp"
 #include "backend/operation.hpp"
-#include "backend/pythonconnector.hpp"
-#include "backend/threadconnector.hpp"
-#include "backend/workerdriver.hpp"
+#include "backend/python_connector.hpp"
+#include "backend/thread_connector.hpp"
+#include "backend/worker_driver.hpp"
 
 namespace husky {
 
