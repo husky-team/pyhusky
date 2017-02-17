@@ -16,22 +16,28 @@ Build
 
 Download the source code:
 
-    git clone https://github.com/husky-team/pyhusky.git
+    $ git clone https://github.com/husky-team/pyhusky.git
 
 Download Husky source code as a submodule:
 
-    git submodule init
-    git submodule update --init --recursive
+    $ git submodule init
+    $ git submodule update --init --recursive
 
 We assume the root directory of PyHusky is `$PYHUSKY_ROOT`. Go to `$PYHUSKY_ROOT` and do a out-of-source build using CMake:
 
-    cd $PYHUSKY_ROOT
-    mkdir release
-    cd release
-    cmake -DCMAKE_BUILD_TYPE=Release ..
-    make help                 # List all build target
-    make -j{N} PyHuskyMaster  # Build the Master of PyHusky
-    make -j{N} PyHuskyDaemon  # Build the Daemon of PyHusky
+    $ cd $PYHUSKY_ROOT
+    $ mkdir release
+    $ cd release
+    $ cmake -DCMAKE_BUILD_TYPE=Release ..
+    $ make help                 # List all build target
+    $ make -j{N} PyHuskyMaster  # Build the Master of PyHusky
+    $ make -j{N} PyHuskyDaemon  # Build the Daemon of PyHusky
+
+Build and install python package:
+
+    $ cd $PYHUSKY_ROOT/python
+    $ python setup.py bdist_wheel  # This requires `wheel` package, run `$ pip install wheel` first.
+    $ pip install dist/pyhusky-0.1.2-py2.py3-none-any.whl
 
 Configuration
 -------------
@@ -43,21 +49,21 @@ Example to run:
 
 First, run `PyHuskyMaster`:
 
-    ./PyHuskyMaster --conf /path/to/your/conf
+    $ ./PyHuskyMaster --conf /path/to/your/conf
 
 Second, set `$PYTHONPATH` environment value:
 
-    export PYTHONPATH=$PYHUSKY_ROOT/python
+    $ export PYTHONPATH=$PYHUSKY_ROOT/python
 
 Run `PyHuskyDaemon` in the single-machine environment:
 
-    ./PyHuskyDaemon --conf /path/to/your/conf
+    $ ./PyHuskyDaemon --conf /path/to/your/conf
 
-Run `PyHuskyMaster` in the distributed environment, copy `$PYHUSKY_ROOT/python` to worker machines and set `$PYTHONPATH` like the second step in worker machines at first.
+Run `PyHuskyMaster` in the distributed environment, remember install python pacakge on each machine:
     
-Then, use `scritps/exec.sh` to execute `PyHuskyDaemon` on all worker machines:
+Use `scritps/exec.sh` to execute `PyHuskyDaemon` on all worker machines:
 
-    ./scritps/exec.sh PyHuskyDaemon --conf /path/to/your/conf
+    $ ./scritps/exec.sh PyHuskyDaemon --conf /path/to/your/conf
 
 Last, start a `python` terminal in `$PYHUSKY_ROOT` on your master machine:
 
