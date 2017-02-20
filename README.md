@@ -51,15 +51,11 @@ First, run `PyHuskyMaster`:
 
     $ ./PyHuskyMaster --conf /path/to/your/conf
 
-Second, set `$PYTHONPATH` environment value:
-
-    $ export PYTHONPATH=$PYHUSKY_ROOT/python
-
 Run `PyHuskyDaemon` in the single-machine environment:
 
     $ ./PyHuskyDaemon --conf /path/to/your/conf
 
-Run `PyHuskyMaster` in the distributed environment, remember install python pacakge on each machine:
+Run `PyHuskyMaster` in the distributed environment, remember to install python pacakge on each machine first:
     
 Use `scritps/exec.sh` to execute `PyHuskyDaemon` on all worker machines:
 
