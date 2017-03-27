@@ -14,13 +14,12 @@ All dependencies of Husky are needed.
 Build
 -----
 
-Download the source code:
+Download the source code recursively:
 
-    $ git clone https://github.com/husky-team/pyhusky.git
+    $ git clone https://github.com/husky-team/pyhusky.git --recursive
 
-Download Husky source code as a submodule:
+If the submodule Husky needs to update:
 
-    $ git submodule init
     $ git submodule update --init --recursive
 
 We assume the root directory of PyHusky is `$PYHUSKY_ROOT`. Go to `$PYHUSKY_ROOT` and do a out-of-source build using CMake:
