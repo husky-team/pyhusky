@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pyhusky.backend.library.functional as functional
-import pyhusky.backend.library.linear_regression as LinearR
-import pyhusky.backend.library.logistic_regression as LogisticR
+import python.pyhusky.backend.library.functional as functional
+import python.pyhusky.backend.library.linear_regression as LinearR
+import python.pyhusky.backend.library.logistic_regression as LogisticR
+import python.pyhusky.backend.library.word as word
 
 def register_func():
     # register
     functional.register_all()
     LinearR.register_all()
     LogisticR.register_all()
+    word.register_all()

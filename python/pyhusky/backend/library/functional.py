@@ -16,8 +16,8 @@ from itertools import groupby, islice
 
 import cloudpickle
 
-from pyhusky.backend.globalvar import GlobalVar, GlobalSocket, OperationParam, GlobalN2NSocket
-from pyhusky.common.serializers import Serializer
+from python.pyhusky.backend.globalvar import GlobalVar, GlobalSocket, OperationParam, GlobalN2NSocket
+from python.pyhusky.common.serializers import Serializer
 
 def register_all():
     """

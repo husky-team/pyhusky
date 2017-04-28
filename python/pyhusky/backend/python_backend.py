@@ -14,10 +14,10 @@
 
 import sys
 
-from pyhusky.backend.globalvar import GlobalSocket, GlobalVar, GlobalN2NSocket
-from pyhusky.backend.processor import handle_instr
-from pyhusky.backend.register import register_func
-from pyhusky.common.serializers import Serializer, PickleSerializer
+from python.pyhusky.backend.globalvar import GlobalSocket, GlobalVar, GlobalN2NSocket
+from python.pyhusky.backend.processor import handle_instr
+from python.pyhusky.backend.register import register_func
+from python.pyhusky.common.serializers import Serializer, PickleSerializer
 
 def log_msg(msg):
     print msg

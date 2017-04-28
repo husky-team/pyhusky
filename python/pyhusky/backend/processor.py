@@ -14,8 +14,8 @@
 
 import sys
 
-from pyhusky.backend.globalvar import GlobalVar, GlobalSocket
-from pyhusky.common.binstream import BinStream
+from python.pyhusky.backend.globalvar import GlobalVar, GlobalSocket
+from python.pyhusky.common.binstream import BinStream
 
 def log_msg(msg):
     print msg

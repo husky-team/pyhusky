@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pyhusky.backend.globalvar import GlobalVar, GlobalSocket, OperationParam
+from python.pyhusky.backend.globalvar import GlobalVar, GlobalSocket, OperationParam
 
 def register_all():
     LinearModel.register()
