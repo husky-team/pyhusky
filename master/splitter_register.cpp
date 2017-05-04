@@ -58,5 +58,11 @@ void splitter_register() {
     OperationSplitter::add_splitter("Word#wordcount_topk_py", OperationSplitter::load);
     OperationSplitter::add_splitter("Word#wordcount_print_py", OperationSplitter::load);
     OperationSplitter::add_splitter("Word#del_py", OperationSplitter::load);
+
+    // Graph
+    OperationSplitter::add_splitter("Graph#load_edgelist_phlist_py", OperationSplitter::simple_split);
+    OperationSplitter::add_splitter("Graph#load_adjlist_hdfs_py", OperationSplitter::simple_split);
+    OperationSplitter::add_splitter("Graph#pagerank_py", OperationSplitter::load);
+    OperationSplitter::add_splitter("Graph#pagerank_topk_py", OperationSplitter::load);
 }
 }  // namespace husky

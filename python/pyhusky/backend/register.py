@@ -16,6 +16,7 @@ import python.pyhusky.backend.library.functional as functional
 import python.pyhusky.backend.library.linear_regression as LinearR
 import python.pyhusky.backend.library.logistic_regression as LogisticR
 import python.pyhusky.backend.library.word as word
+import python.pyhusky.backend.library.graph as graph
 
 def register_func():
     # register
@@ -23,3 +24,4 @@ def register_func():
     LinearR.register_all()
     LogisticR.register_all()
     word.register_all()
+    graph.register_all()
