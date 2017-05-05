@@ -80,7 +80,7 @@ void PythonConnector::start_python_proc(int lid, int gid, int num_workers) {
     std::string master_port = std::to_string(Context::get_config().get_master_port());
     std::string proc_id = std::to_string(Context::get_worker_info().get_process_id());
     extern_py_proc =
-        popen(("python -m python.pyhusky.backend.python_backend " + std::to_string(lid) + " " + std::to_string(gid) + " " +
+        popen(("python -m pyhusky.backend.python_backend " + std::to_string(lid) + " " + std::to_string(gid) + " " +
                proc_id + " " + std::to_string(num_workers) + " " + master_port + " > /tmp/log-pyhusky-" + master_port +
                "-proc-" + proc_id + "-" + std::to_string(lid))
                   .c_str(),

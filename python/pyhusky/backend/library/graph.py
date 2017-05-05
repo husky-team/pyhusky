@@ -14,7 +14,7 @@
 
 import json
 import cPickle
-from python.pyhusky.backend.globalvar import GlobalVar, GlobalSocket, OperationParam
+from pyhusky.backend.globalvar import GlobalVar, GlobalSocket, OperationParam
 
 def register_all():
     # register graph

@@ -15,10 +15,10 @@
 #include "backend/register.hpp"
 
 #include "backend/library/functional.hpp"
+#include "backend/library/graph.hpp"
 #include "backend/library/linear_regression.hpp"
 #include "backend/library/logistic_regression.hpp"
 #include "backend/library/word.hpp"
-#include "backend/library/graph.hpp"
 
 namespace husky {
 
