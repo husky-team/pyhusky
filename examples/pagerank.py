@@ -12,13 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pyhusky.frontend.library.linear_regression_receiver import LinearRegressionModelReceiver
-from pyhusky.frontend.library.logistic_regression_receiver import LogisticRegressionModelReceiver
-from pyhusky.frontend.library.word_receiver import WordReceiver 
-from pyhusky.frontend.library.graph_receiver import GraphReceiver
+import pyhusky.frontend as ph
+from pyhusky.frontend.library.graph import Graph
 
-def register(receiver_map):
-    LinearRegressionModelReceiver.register(receiver_map)
-    LogisticRegressionModelReceiver.register(receiver_map)
-    WordReceiver.register(receiver_map)
-    GraphReceiver.register(receiver_map)
+ph.env.pyhusky_start("master", 32441)
+
+edges = [(1,2),(2,3),(3,4),(4,5),(5,1),(1,3),(4,3)]
+edgelist = ph.env.parallelize(edges)
+
+graph = Graph()
+graph.load_edgelist_phlist(edgelist)
+graph.compute(iter=10)
+print graph.topk(2)

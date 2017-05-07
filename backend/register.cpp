@@ -15,8 +15,10 @@
 #include "backend/register.hpp"
 
 #include "backend/library/functional.hpp"
+#include "backend/library/graph.hpp"
 #include "backend/library/linear_regression.hpp"
 #include "backend/library/logistic_regression.hpp"
+#include "backend/library/word.hpp"
 
 namespace husky {
 
@@ -25,12 +27,16 @@ void RegisterFunction::register_py_handlers() {
     PyHuskyLinearR::init_py_handlers();
     // PyHuskySVM::init_py_handlers();
     PyHuskyLogisticR::init_py_handlers();
+    PyHuskyWord::init_py_handlers();
+    PyHuskyGraph::init_py_handlers();
 }
 
 void RegisterFunction::register_cpp_handlers() {
     PyHuskyLinearR::init_cpp_handlers();
     // PyHuskySVM::init_cpp_handlers();
     PyHuskyLogisticR::init_cpp_handlers();
+    PyHuskyWord::init_cpp_handlers();
+    PyHuskyGraph::init_cpp_handlers();
 }
 
 void RegisterFunction::register_daemon_handlers() {
@@ -38,6 +44,8 @@ void RegisterFunction::register_daemon_handlers() {
     PyHuskyLinearR::init_daemon_handlers();
     // PyHuskySVM::init_daemon_handlers();
     PyHuskyLogisticR::init_daemon_handlers();
+    PyHuskyWord::init_daemon_handlers();
+    PyHuskyGraph::init_daemon_handlers();
 }
 
 }  // namespace husky

@@ -18,5 +18,7 @@ add_library(pyhusky-backend-library-objs OBJECT
     functional.cpp
     linear_regression.cpp
     logistic_regression.cpp
+    word.cpp
+    graph.cpp
 )
 set_property(TARGET pyhusky-backend-library-objs PROPERTY CXX_STANDARD 14)
