@@ -20,58 +20,68 @@ from pyhusky.frontend.huskylist import HuskyList
 from pyhusky.frontend.huskylist import PyHuskyList
 
 class SVMModel(HuskyList):
-    def __init__(self, n_feature=-1):
+    def __init__(self, n_feature=-1, is_sparse="true"):
         assert isinstance(n_feature, int)
         super(SVMModel, self).__init__()
 
         self.list_name += "SVM"
         self.loaded = False
         self.trained = False
+        self.train_set_cached = False
         self.param = None
         self.intercept = None
+        self.is_sparse = is_sparse
 
         param = {"n_feature" : str(n_feature),
                  OperationParam.list_str : self.list_name,
+                 "is_sparse" : self.is_sparse,
                  "Type" : "cpp"}
-        op = Operation("SVMModel#SVM_init_py", param, [])
-        scheduler.compute(op)
+        # op = Operation("SVMModel#SVM_init_py", param, [])
+        # scheduler.compute(op)
+        self.pending_op = Operation("SVMModel#SVM_init_py", param, [])
 
-    def load_hdfs(self, url):
+    def load_hdfs(self, url, fmat):
         assert isinstance(url, str)
         assert not self.loaded
 
         param = {"url" : url,
+                 "format" : fmat,
+                 "is_sparse" : self.is_sparse,
                  OperationParam.list_str : self.list_name,
                  "Type" : "cpp"}
-        op = Operation("SVMModel#SVM_load_hdfs_py", param, [])
-        scheduler.compute(op)
+        self.pending_op = Operation("SVMModel#SVM_load_hdfs_py", param, [self.pending_op])
+        # scheduler.compute(op)
         self.loaded = True
 
     def load_pyhlist(self, xy_list):
         assert not self.loaded
 
         if isinstance(xy_list, PyHuskyList):
-            param = {OperationParam.list_str : self.list_name}
-            self.pending_op = Operation("SVMModel#SVM_load_pyhlist_py", param, [xy_list.pending_op])
+            param = {OperationParam.list_str : self.list_name, "is_sparse" : self.is_sparse}
+            self.pending_op = Operation("SVMModel#SVM_load_pyhlist_py", param, [self.pending_op, xy_list.pending_op])
             scheduler.compute(self.pending_op)
+            self.train_set_cached = True
             self.loaded = True
         else:
             return NotImplemented
 
-    def train(self, n_iter=10, alpha=0.1):
+    def train(self, n_iter=10, lam=0.1, C=None):
         assert self.loaded
         assert isinstance(n_iter, int)
-        assert isinstance(alpha, float)
 
         param = {"n_iter" : str(n_iter),
-                 "alpha" : str(alpha),
+                 "is_sparse" : self.is_sparse,
+                 "lambda" : str(lam),
                  OperationParam.list_str : self.list_name,
                  "Type" : "cpp"}
-        op = Operation("SVMModel#SVM_train_py", param, [])
-        param_list = scheduler.compute_collect(op)
-        self.param = np.array(param_list[:-1])
-        self.intercept = param_list[-1]
-        self.loaded = False
+        if C is not None:
+            param["C"] = str(C)
+        self.pending_op = Operation("SVMModel#SVM_train_py", param, [self.pending_op]\
+            if not self.train_set_cached else [Operation("SVMModel#SVM_init_py", {"Type":"cpp"}, [])])
+        self.train_set_cached = True
+        param_list = scheduler.compute_collect(self.pending_op)
+        self.param = np.array(param_list[1:])
+        self.intercept = param_list[0]
         self.trained = True
 
     def get_param(self):
@@ -94,3 +104,18 @@ class SVMModel(HuskyList):
         assert hasattr(X, '__iter__')
 
         return np.dot(np.array(X), self.param) + self.intercept
+
+    def test(self, url, fmat, is_sparse = None):
+        assert isinstance(url, str)
+        assert self.trained
+
+        if is_sparse is None:
+            is_sparse = self.is_sparse
+
+        param = {"url" : url,
+                 "format" : str(fmat),
+                 "is_sparse" : str(self.is_sparse),
+                 OperationParam.list_str : self.list_name,
+                 "Type" : "cpp"}
+        op = Operation("SVMModel#SVM_test_py", param, [])
+        return scheduler.compute_collect(op)

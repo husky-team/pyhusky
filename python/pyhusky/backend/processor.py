@@ -18,8 +18,8 @@ from pyhusky.backend.globalvar import GlobalVar, GlobalSocket
 from pyhusky.common.binstream import BinStream
 
 def log_msg(msg):
-    print msg
-    sys.stdout.flush()
+    sys.stderr.write(msg + "\n")
+    sys.stderr.flush()
 
 def get_map_partition(node):
     map_partitions = []

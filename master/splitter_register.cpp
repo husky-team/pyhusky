@@ -42,7 +42,7 @@ void splitter_register() {
     OperationSplitter::add_splitter("SVMModel#SVM_init_py", OperationSplitter::load);
     OperationSplitter::add_splitter("SVMModel#SVM_load_hdfs_py", OperationSplitter::load);
     OperationSplitter::add_splitter("SVMModel#SVM_load_pyhlist_py", OperationSplitter::simple_split);
-    OperationSplitter::add_splitter("SVMModel#SVM_train_py", OperationSplitter::load);
+    OperationSplitter::add_splitter("SVMModel#SVM_test_py", OperationSplitter::load);
 
     // Logistic Regression
     OperationSplitter::add_splitter("LogisticRegressionModel#LogisticR_init_py", OperationSplitter::load);
