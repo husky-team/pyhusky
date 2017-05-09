@@ -49,7 +49,6 @@ void splitter_register() {
     OperationSplitter::add_splitter("LogisticRegressionModel#LogisticR_load_hdfs_py", OperationSplitter::load);
     OperationSplitter::add_splitter("LogisticRegressionModel#LogisticR_load_pyhlist_py",
                                     OperationSplitter::simple_split);
-    OperationSplitter::add_splitter("LogisticRegressionModel#LogisticR_train_py", OperationSplitter::load);
 
     // Word
     OperationSplitter::add_splitter("Word#load_phlist_py", OperationSplitter::simple_split);

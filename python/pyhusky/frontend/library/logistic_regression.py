@@ -33,56 +33,87 @@ class LogisticRegressionModel(HuskyList):
         param = {"n_feature" : str(n_feature),
                  OperationParam.list_str : self.list_name,
                  "Type" : "cpp"}
-        op = Operation("LogisticRegressionModel#LogisticR_init_py", param, [])
-        scheduler.compute(op)
+        self.pending_op = Operation("LogisticRegressionModel#LogisticR_init_py", param, [])
 
-    def load_hdfs(self, url, is_sparse=0, fmat="tsv"):
+    def load_train_set(self, source, **kwargs):
+        """Load the training dataset.
+
+        Keyword arguments:
+        source -- Source of the data. It could be a URL or a PyHuskyList.
+        is_sparse -- Indicate whether it's a sparse dataset.
+        format -- Indicate the type of dataset. Not applicable in the case of PyHuskyList source.
+        """
+        if isinstance(source, str):
+            self.__load_hdfs(source, **kwargs)
+        elif isinstance(source, PyHuskyList):
+            self.__load_pyhlist(source, **kwargs)
+        else:
+            raise NotImplementedError
+
+    def __load_hdfs(self, url, **kwargs):
         assert isinstance(url, str)
         assert not self.loaded
 
-        param = {"url" : url,
-                 OperationParam.list_str : self.list_name,
-                 "is_sparse": str(is_sparse),
-                 "format": fmat,
-                 "Type" : "cpp"}
-        op = Operation("LogisticRegressionModel#LogisticR_load_hdfs_py", param, [])
-        scheduler.compute(op)
+        if "is_sparse" not in kwargs:
+            kwargs["is_sparse"] = 1
+        if "format" not in kwargs:
+            kwargs["format"] = "libsvm"
+
+        self.pending_op = Operation("LogisticRegressionModel#LogisticR_load_hdfs_py", 
+            {
+                "url" : url,
+                OperationParam.list_str : self.list_name,
+                "format": kwargs["format"],
+                "is_sparse": str(kwargs["is_sparse"]),
+                "Type" : "cpp"
+            },
+            [self.pending_op]
+        )
         self.loaded = True
 
-    def load_pyhlist(self, xy_list, is_sparse=1):
+    def __load_pyhlist(self, xy_list, **kwargs):
         assert not self.loaded
 
-        if isinstance(xy_list, PyHuskyList):
-            param = {OperationParam.list_str : self.list_name,
-                     "is_sparse": str(is_sparse)}
-            self.pending_op = Operation("LogisticRegressionModel#LogisticR_load_pyhlist_py", param, [xy_list.pending_op])
-            scheduler.compute(self.pending_op)
-            self.loaded = True
-        else:
-            return NotImplemented
+        if "is_sparse" not in kwargs:
+            kwargs["is_sparse"] = 1
+
+        if not isinstance(xy_list, PyHuskyList):
+            raise NotImplementedError
+        self.pending_op = Operation("LogisticRegressionModel#LogisticR_load_pyhlist_py", 
+            {
+                OperationParam.list_str : self.list_name,
+                "is_sparse": str(kwargs["is_sparse"])
+            },
+            [self.pending_op]
+        )
+        self.loaded = True
 
     def train(self, n_iter=10, alpha=0.1, is_sparse=1):
         assert self.loaded
         assert isinstance(n_iter, int)
         assert isinstance(alpha, float)
 
-        param = {"n_iter" : str(n_iter),
-                 "alpha" : str(alpha),
-                 OperationParam.list_str : self.list_name,
-                 "is_sparse": str(is_sparse),
-                 "Type" : "cpp"}
-        op = Operation("LogisticRegressionModel#LogisticR_train_py", param, [])
-        paramlist = scheduler.compute_collect(op)
+        self.pending_op = Operation("LogisticRegressionModel#LogisticR_train_py",
+            {
+                "n_iter" : str(n_iter),
+                "alpha" : str(alpha),
+                OperationParam.list_str : self.list_name,
+                "is_sparse": str(is_sparse),
+                "Type" : "cpp"
+            },
+            [Operation("LogisticRegressionModel#LogisticR_init_py", {"Type" : "cpp"})] \
+                if self.trained else [self.pending_op]
+        )
+
+        print self.pending_op.op_deps
+        paramlist = scheduler.compute_collect(self.pending_op)
         self.param = np.array(paramlist[:-1])
         self.intercept = paramlist[-1]
-        self.loaded = False
         self.trained = True
 
     def get_param(self):
-        """
-        Returns:
-            An np.array which contains the parameter (vector)
-            But except intercept term
+        """Return an np.array which contains the parameter (vector),
+        except the intercept term.
         """
         assert self.trained
 
