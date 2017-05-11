@@ -22,5 +22,5 @@ edgelist = ph.env.parallelize(edges)
 
 graph = Graph()
 graph.load_edgelist_phlist(edgelist)
-graph.compute(iter=10)
-print graph.topk(2)
+graph.compute_pagerank(iter=10)
+print graph.topk_pagerank(2)
