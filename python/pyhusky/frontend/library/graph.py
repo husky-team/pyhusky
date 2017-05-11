@@ -42,7 +42,7 @@ class Graph(HuskyList):
         scheduler.compute(op)
         self._loaded = True
 
-    def compute(self, iter):
+    def compute_pagerank(self, iter):
         assert self._loaded == True, "The graph is not loaded"
         param = {"iter" : str(iter), 
                  OperationParam.list_str : self.list_name,
@@ -51,7 +51,7 @@ class Graph(HuskyList):
         scheduler.compute(op)
         self._computed = True
 
-    def topk(self, k):
+    def topk_pagerank(self, k):
         assert self._computed == True, "You haven't computed Pagerank"
         param = {"k" : str(k), 
                  OperationParam.list_str : self.list_name,
