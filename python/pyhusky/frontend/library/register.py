@@ -14,6 +14,7 @@
 
 from pyhusky.frontend.library.linear_regression_receiver import LinearRegressionModelReceiver
 from pyhusky.frontend.library.logistic_regression_receiver import LogisticRegressionModelReceiver
+from pyhusky.frontend.library.svm_receiver import SVMReceiver
 from pyhusky.frontend.library.word_receiver import WordReceiver 
 from pyhusky.frontend.library.graph_receiver import GraphReceiver
 
@@ -22,3 +23,4 @@ def register(receiver_map):
     LogisticRegressionModelReceiver.register(receiver_map)
     WordReceiver.register(receiver_map)
     GraphReceiver.register(receiver_map)
+    SVMReceiver.register(receiver_map)

@@ -19,6 +19,7 @@ class SVMReceiver(object):
     @staticmethod
     def register(receiver_map):
         receiver_map["SVMModel#SVM_train_py"] = SVMReceiver.train_receiver
+        receiver_map["SVMModel#SVM_test_py"] = SVMReceiver.test_receiver
 
     @staticmethod
     def train_receiver(reply):
@@ -30,3 +31,8 @@ class SVMReceiver(object):
             param_v = reply.load_double()
             res.append(param_v)
         return res
+
+    @staticmethod
+    def test_receiver(reply):
+        reply.load_int64()
+        return reply.load_double()

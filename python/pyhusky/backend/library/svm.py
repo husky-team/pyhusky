@@ -35,6 +35,7 @@ class SVMModel(object):
     @staticmethod
     def load_pyhlist_prefunc(op):
         GlobalVar.xy_line_list = op.op_param[OperationParam.list_str]
+        GlobalVar.is_sparse = op.op_param["is_sparse"]
         GlobalVar.xy_line_store = []
 
     @staticmethod
@@ -49,12 +50,15 @@ class SVMModel(object):
     def load_pyhlist_end_postfunc(_):
         GlobalSocket.pipe_to_cpp.send("SVMModel#SVM_load_pyhlist_py")
         GlobalSocket.pipe_to_cpp.send(GlobalVar.xy_line_list)
+        GlobalSocket.pipe_to_cpp.send(GlobalVar.is_sparse)
         # send out the len of datatset
+        assert len(GlobalVar.xy_line_store) != 0
         GlobalSocket.pipe_to_cpp.send(str(len(GlobalVar.xy_line_store)))
         for (X, y) in GlobalVar.xy_line_store:
             # send out the len of X
             GlobalSocket.pipe_to_cpp.send(str(len(X)))
-            for i in X:
+            for (i, v) in X:
                 GlobalSocket.pipe_to_cpp.send(str(i))
+                GlobalSocket.pipe_to_cpp.send(str(v))
             GlobalSocket.pipe_to_cpp.send(str(y))
         GlobalSocket.xy_line_store = []

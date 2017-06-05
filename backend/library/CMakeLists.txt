@@ -20,5 +20,6 @@ add_library(pyhusky-backend-library-objs OBJECT
     logistic_regression.cpp
     word.cpp
     graph.cpp
+    svm.cpp
 )
 set_property(TARGET pyhusky-backend-library-objs PROPERTY CXX_STANDARD 14)
