@@ -38,10 +38,14 @@ Build and install python package:
     $ python setup.py bdist_wheel  # This requires `wheel` package, run `$ pip install wheel` first.
     $ pip install dist/pyhusky-0.1.2-py2.py3-none-any.whl
 
+For development, to set the environment variable `$PYTHONPATH` is better than building and installing:
+
+    $ export PYTHONPATH=$PYHUSKY_ROOT/python
+
 Configuration
 -------------
 
-It is the same configuration as Husky. See (Config-How-to)[https://github.com/husky-team/husky/wiki/Config-How-to].
+It is the same configuration as Husky. See [Config-How-to](https://github.com/husky-team/husky/wiki/Config-How-to).
 
 Example to run:
 -------------
